@@ -95,7 +95,7 @@ char* get_bt_name();
 char* get_bt_uuid();
 
 unsigned char* enc_setup_neighbor(int *len);
-unsigned char* enc_setup_neighborList(int row, int col, char** result);
+unsigned char* enc_setup_neighborList(int row, int col, char** result, int* len);
 //unsigned char* enc_auth_to_main(int authNeighborLen, int* neighborNum);
 unsigned char* enc_auth_to_main(int* len);
 
@@ -107,7 +107,7 @@ void insert_param(int dev_num, unsigned char* P1, unsigned char* P2, unsigned ch
 void insert_neighbor(int dev_num, char* mac, char* uuid, char* name);
 void insert_Da(int dev_num, char* _Da);
 void _sqlite3_close();
-void select_neighborList();
+unsigned char* select_neighborList(int *len);
 void select_param();
 int select_neighborByMAC(char* MAC);
 

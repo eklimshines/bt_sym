@@ -8,7 +8,7 @@ SKMIB_t skmib;
 void init_sqlite3_param(){
 	int ret = 0;
 	char *err_msg = 0;
-
+	char *sql = NULL;
 	ret = sqlite3_open("sk.sqlite3", &conn);
 
 	printf("init SQLite3 \n");
@@ -19,8 +19,8 @@ void init_sqlite3_param(){
 	}
 
 	if(skmib._neighbor == 1 || skmib._neighborAuth){
-		char *sql = "CREATE TABLE Param(dev_id INTEGER PRIMARY KEY, P1 TEXT, P2 TEXT, PUB TEXT, Da TEXT);" ;
-	}else char *sql = "CREATE TABLE Param(dev_id INTEGER PRIMARY KEY, P1 TEXT, P2 TEXT, s TEXT);" ;
+		sql = "CREATE TABLE Param(dev_id INTEGER PRIMARY KEY, P1 TEXT, P2 TEXT, PUB TEXT, Da TEXT);" ;
+	}else sql = "CREATE TABLE Param(dev_id INTEGER PRIMARY KEY, P1 TEXT, P2 TEXT, s TEXT);" ;
 	
 	 ret = sqlite3_exec(conn, sql, 0, 0, &err_msg);
 	 
@@ -187,9 +187,9 @@ int select_neighborByMAC(char* MAC){
 
 }
 
-void select_neighborList(){
+unsigned char* select_neighborList(int* len){
 	char *sql = "SELECT * FROM Neighbors";
-	
+
 	char **result;
 	char *err_msg;
 	int row = 0;
@@ -197,6 +197,9 @@ void select_neighborList(){
 	int ret = 0;
 	int i = 0;
 	int j = 0;
+
+	unsigned char* data = NULL;
+	int dataLen = 0;
 
 	/*
 	ret = sqlite3_exec(conn, sql, callback, 0, &err_msg);
@@ -209,7 +212,7 @@ void select_neighborList(){
 	        sqlite3_free(err_msg);
 
 	        return ;
-    	} 
+    	}
 	*/
 
 	ret = sqlite3_get_table(conn, sql, &result, &row, &col, &err_msg);
@@ -228,9 +231,14 @@ void select_neighborList(){
 //		printf("%d, %d, %d\n", strlen(result[i*col]), strlen(result[i*col+1]), strlen(result[i*col+2]));
 	}
 
-        enc_setup_neighborList(row, col, result);
+        data = enc_setup_neighborList(row, col, result, &dataLen);
+
+	*len = dataLen;
+	//client_send(data, dataLen);
 
 	sqlite3_free_table(result);
+
+	return data;
 
 }
 

@@ -148,7 +148,7 @@ unsigned char* enc_setup_neighbor(int *len){
 }
 
 
-unsigned char* enc_setup_neighborList(int row, int col, char** result){
+unsigned char* enc_setup_neighborList(int row, int col, char** result, int *len){
 	unsigned char* data = NULL;
 	unsigned char* param = NULL;
 	int i = 0, j = 0;
@@ -174,6 +174,7 @@ unsigned char* enc_setup_neighborList(int row, int col, char** result){
 	dataLen = row * (macLen + uuidLen + nameLen + DaLen + 5);
 	dataLen += paramLen;
 	data = (unsigned char *)malloc(dataLen + headerTailLen);
+	
 	*len = dataLen + headerTailLen;
 
 	data[i++] = 0x02;
@@ -356,7 +357,7 @@ void parse_key(unsigned char* data){
 	_sk_setup_param(_P1, _P2, _Ppub);
 	_sk_setup_key(_Da);
 
-	insert_param_neighbor(1, _P1, _P2, Ppub, _Da);
+	insert_param_neighbor(1, _P1, _P2, _Ppub, _Da);
 
 	printf_byte(_Da, keyLen);
 }
