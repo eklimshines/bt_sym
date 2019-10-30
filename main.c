@@ -40,9 +40,6 @@ int main(int argc, char **argv)
     int ret = 0;
     int err = 0;
     int len = 0;
-    init_sqlite3();
-    init_sqlite3_param();
-
     //insert_neighbor(6, get_bt_addr(), get_bt_uuid(), get_bt_name());
 
     //select_neighborList();
@@ -58,6 +55,10 @@ int main(int argc, char **argv)
     //Set the paring parameters
     pbc_demo_pairing_init(pairing, argc, argv);
  
+
+    init_sqlite3();
+    init_sqlite3_param();
+
     if(skmib._userSetup == 1) _sk_setup();
     if(skmib._userAuth == 1 || skmib._neighborAuth == 1) select_param(); //_sk_setup_load();
 

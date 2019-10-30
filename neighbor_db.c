@@ -18,10 +18,14 @@ void init_sqlite3_param(){
 		return ;
 	}
 
-	if(skmib._neighbor == 1 || skmib._neighborAuth){
+	printf("skmib %d, %d \n", skmib._neighbor, skmib._neighborAuth);
+
+	if(skmib._neighbor == 1 || skmib._neighborAuth == 1){
 		sql = "CREATE TABLE Param(dev_id INTEGER PRIMARY KEY, P1 TEXT, P2 TEXT, PUB TEXT, Da TEXT);" ;
 	}else sql = "CREATE TABLE Param(dev_id INTEGER PRIMARY KEY, P1 TEXT, P2 TEXT, s TEXT);" ;
 	
+	printf("sql: %s \n",sql);
+
 	 ret = sqlite3_exec(conn, sql, 0, 0, &err_msg);
 	 
 	 if (ret != SQLITE_OK ) {
