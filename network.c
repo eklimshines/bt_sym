@@ -182,6 +182,8 @@ unsigned char* enc_setup_neighborList(int row, int col, char** result, int *len)
 	data[i++] = dataLen >> 0;
 	data[i++] = 0x02;
 
+	data[i++] = paramLen >> 8;
+	data[i++] = paramLen >> 0;
 	memcpy(&data[i], param, paramLen);
 	i += paramLen;
 
@@ -272,7 +274,7 @@ void parse_neighborList(unsigned char* data){
 	if(neighborLen < 0) printf("Parse List NeighborLen Error!!!\n");
 	
 	printf("neighborLen: %d \n", neighborLen);
-
+/*
 	for(j = 0; j < neighborLen; j++){
 		dev_num = data[i++];
 
@@ -315,7 +317,7 @@ void parse_neighborList(unsigned char* data){
 		free(uuid);
 		free(name);
 		free(_Da);
-	}
+	}*/
 	
 }
 
