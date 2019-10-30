@@ -1,0 +1,575 @@
+#include "main.h"
+
+static element_t Ppub,P1,P2,s,g,Da;
+pairing_t pairing;
+
+void sendTag(unsigned char* data){
+	int i = 0;
+	int macLen = 0;
+	int paramLen = 0;
+	int encLen = 0;
+	int len = 0;
+
+	unsigned char* _enc = NULL;
+	unsigned char* _param = NULL;
+	unsigned char* _MAC = NULL;
+	unsigned char* _key = NULL;
+	unsigned char* _tag = NULL;
+	unsigned char* _dec = NULL;
+
+	macLen = data[i++];
+	_MAC = (unsigned char*) malloc(macLen);
+	memcpy(_MAC, &data[i], macLen);
+	i += macLen;
+
+	paramLen = data[i++] << 8;
+	paramLen |= data[i++] << 0;
+	_param = (unsigned char*) malloc(paramLen);
+	memcpy(_param, &data[i], paramLen);
+	i += paramLen;
+
+	encLen = data[i++] << 8;
+	encLen |= data[i++] << 0;
+	_enc = (unsigned char*) malloc(encLen);
+	memcpy(_enc, &data[i], encLen);
+	i += encLen;
+
+	_key = _sk_kem_dec(_enc);
+
+	_tag = HMAC_SHA512(_key, data, &len);
+
+}
+
+void sendEnc(char* ID){
+	unsigned char* _enc = NULL;
+	unsigned char* _param = NULL;
+	unsigned char* data = NULL;
+	
+	int i = 0;
+	int checkMac = -1;
+	int encLen = -1;
+	int paramLen = -1;
+	int macLen = strlen(ID);
+	int dataLen = -1;
+
+	checkMac = select_neighborByMAC(ID);
+	
+	if(checkMac <= 0){
+		printf("No MAC \n");
+		return NULL;
+	}else printf("MainDevice Send Enc Func\n");
+
+	_param = getPublicParam(&paramLen);
+	_enc = _sk_kem_enc(ID, &encLen);
+
+	dataLen = 10 + encLen + macLen + paramLen;
+	data = (unsigned char*) malloc(dataLen);
+	
+	data[i++] = 0x02;
+
+	data[i++] = dataLen >> 8;
+	data[i++] = dataLen >> 0;
+
+	data[i++] = 0x06;
+
+	data[i++] = macLen;
+	memcpy(&data[i], ID, macLen);
+	i += macLen;
+
+	data[i++] = paramLen >> 8;
+	data[i++] = paramLen >> 0;
+
+	memcpy(&data[i], _param, paramLen);
+	i += paramLen;
+
+	data[i++] = encLen >> 8;
+	data[i++] = encLen >> 0;
+
+	memcpy(&data[i], _enc, encLen);
+	i += encLen;
+
+	data[i++] = 0x03;
+
+	blue_send(data, dataLen);
+
+}
+
+unsigned char* getPpub(int *len){
+	unsigned char* data;
+	int PpubLen;
+
+	data = (unsigned char*) malloc(PpubLen);
+	data = pbc_malloc(PpubLen);
+
+	element_to_bytes(data, Ppub);
+	*len = PpubLen;
+
+	return data;
+
+}
+
+void setPublicParam(unsigned char* data, int len){
+	unsigned char* _P1 = NULL;
+	unsigned char* _P2 = NULL;
+	unsigned char* _Ppub = NULL;
+
+	int i =0;
+	int P1Len = 0, P2Len = 0, PpubLen = 0;
+
+	printf("SetPublicParam \n");
+
+	printf_byte(data, len);
+
+	element_init_G1(Ppub, pairing);
+	element_init_G1(P1, pairing);
+	element_init_G2(P2, pairing);
+	element_init_GT(g, pairing);
+	element_init_Zr(s, pairing);
+
+	//P1Len = data[i++] << 8;
+	//P1Len |= data[i++] << 0;
+
+	P1Len = data[i++];
+	_P1 = (unsigned char*) malloc(P1Len);
+	memcpy(_P1, &data[i], P1Len);
+	i += P1Len;
+
+	P2Len = data[i++];
+	_P2 = (unsigned char*) malloc(P2Len);
+	memcpy(_P2, &data[i], P2Len);
+	i += P2Len;
+
+	PpubLen = data[i++];
+	_Ppub = (unsigned char*) malloc(PpubLen);
+	memcpy(_Ppub, &data[i], PpubLen);
+	i += PpubLen;
+
+	element_from_bytes(P1, _P1);
+	element_from_bytes(P2, _P2);
+	element_from_bytes(Ppub, _Ppub);
+
+	element_printf("P1 =%B\n", P1);
+	element_printf("P2 =%B\n", P2);
+	element_printf("Ppub =%B\n", Ppub);
+	
+    	element_pairing(g, P1, P2);
+    	element_printf("g =%B\n",g);
+
+}
+
+unsigned char* getPublicParam(int *len){
+	unsigned char* data;
+	unsigned char *_p1, *_p2, *_pPub;
+	int i = 0;
+	int p1Len, p2Len, PpubLen, dataLen;
+
+	printf("GetPublicParam\n");
+
+	element_printf("P1 =%B\n", P1);
+	element_printf("P2 =%B\n", P2);
+	element_printf("Ppub =%B\n", Ppub);
+
+
+	p1Len = element_length_in_bytes(P1);
+	p2Len = element_length_in_bytes(P2);
+	PpubLen = element_length_in_bytes(Ppub);
+
+	dataLen = p1Len + p2Len + PpubLen + 3;
+
+	printf("GetPublicParam :%d\n",dataLen);
+
+	data = (unsigned char*)malloc(dataLen);
+	_p1 = pbc_malloc(p1Len);
+	_p2 = pbc_malloc(p2Len);
+	_pPub = pbc_malloc(PpubLen);
+
+	element_to_bytes(_p1, P1);
+	element_to_bytes(_p2, P2);
+	element_to_bytes(_pPub, Ppub);
+
+	data[i++] = p1Len;
+	memcpy(&data[i], _p1, p1Len);
+	i+= p1Len;
+
+	data[i++] = p2Len;
+	memcpy(&data[i], _p2, p2Len);
+	i+= p2Len;
+
+	data[i++] = PpubLen;
+	memcpy(&data[i], _pPub, PpubLen);
+	i+= PpubLen;
+
+	*len = dataLen;
+
+	//printf("getPublicParam i:%d, datalen:%d, len:%d\n",i,dataLen,len);
+
+	return data;
+}
+
+void _sk_close(){
+	element_clear(Ppub);
+    	element_clear(P1);
+    	element_clear(P2);
+    	element_clear(s);
+    	element_clear(g);
+	element_clear(Da);
+
+    	pairing_clear(pairing);
+}
+
+void _sk_setup_load_neighbor(int row, int col, char** result){
+	int j = 0;
+
+	element_init_G1(Ppub, pairing);
+	element_init_G1(P1, pairing);
+	element_init_G2(P2, pairing);
+	element_init_G2(Da, pairing);
+	element_init_GT(g, pairing);
+
+	printf("Setup Load Neighbor.\n");
+
+	for(j = 1; j <= row; j++){
+		printf("sk setup neighbor load: %d \n", result[j*col]);
+
+		printf_byte(result[j*col+1], strlen(result[j*col+1]));
+
+		element_from_bytes(P1, result[j * col + 1]);
+		element_printf("P1 =%B\n",P1);
+	
+		element_from_bytes(P2, result[j * col + 2]);
+		element_printf("P2 =%B\n",P2);
+		
+		element_from_bytes(Ppub, result[j * col + 3]);
+		element_printf("Ppub =%B\n",s);
+
+		element_from_bytes(Da, result[j * col + 4]);
+		element_printf("Da =%B\n",s);
+	}
+    	element_pairing(g, P1, P2);
+    	element_printf("g =%B\n",g);
+}
+
+void _sk_setup_load(int row, int col, char** result){
+	int j = 0;
+
+	element_init_G1(Ppub, pairing);
+	element_init_G1(P1, pairing);
+	element_init_G2(P2, pairing);
+	element_init_GT(g, pairing);
+	element_init_Zr(s, pairing);
+
+	printf("Setup.\n");
+
+	for(j = 1; j <= row; j++){
+		printf("sk setup load: %d \n", result[j*col]);
+
+		printf_byte(result[j*col+1], strlen(result[j*col+1]));
+
+		element_from_bytes(P1, result[j * col + 1]);
+		element_printf("P1 =%B\n",P1);
+	
+		element_from_bytes(P2, result[j * col + 2]);
+		element_printf("P2 =%B\n",P2);
+		
+		element_from_bytes(s, result[j * col + 3]);
+		element_printf("s =%B\n",s);
+	}
+
+
+    	element_pairing(g, P1, P2);
+    	element_printf("g =%B\n",g);
+    	element_mul_zn(Ppub,P1,s);
+    	element_printf("Ppub =%B \n",Ppub);
+}
+
+void _sk_setup(){
+
+	unsigned char* _P1 = NULL;
+	unsigned char* _P2 = NULL;
+	unsigned char* _s = NULL;
+
+	int P1Len;
+	int P2Len;
+	int sLen;
+
+	element_init_G1(Ppub, pairing);
+	element_init_G1(P1, pairing);
+	element_init_G2(P2, pairing);
+	element_init_GT(g, pairing);
+	element_init_Zr(s, pairing);
+
+	printf("Setup.\n");
+    	element_random(P1);
+    	element_random(P2);
+    	element_random(s);
+
+    	element_printf("P1 =%B\n",P1);
+    	element_printf("P2 =%B\n",P2);
+    	element_printf("s =%B\n",s);
+
+    	element_pairing(g, P1, P2);
+    	element_printf("g =%B\n",g);
+    	element_mul_zn(Ppub,P1,s);
+    	element_printf("Ppub =%B \n",Ppub);
+	
+	P1Len = element_length_in_bytes(P1);
+	P2Len = element_length_in_bytes(P2);
+	sLen = element_length_in_bytes(s);
+	
+	_P1 = pbc_malloc(P1Len);
+	_P2 = pbc_malloc(P2Len);
+	_s = pbc_malloc(sLen);
+
+	element_to_bytes(_P1, P1);
+	element_to_bytes(_P2, P2);
+	element_to_bytes(_s, s);
+
+	//printf("%d %d %d Len\n", P1Len, P2Len, sLen);
+
+	//printf("%s %s %s \n", _P1, _P2, _s);
+
+	insert_param(1, _P1, _P2, _s);
+}
+
+void _sk_setup_key(unsigned char* _Da){
+
+	element_init_G2(Da, pairing);
+	element_from_bytes(Da, _Da);
+
+	element_printf("Da =%B\n",Da);
+
+}
+void _sk_setup_param(unsigned char* _P1, unsigned char* _P2, unsigned char* _Ppub){
+	element_init_G1(Ppub, pairing);
+	element_init_G1(P1, pairing);
+	element_init_G2(P2, pairing);
+
+	element_from_bytes(P1, _P1);
+	element_from_bytes(P2, _P2);
+	element_from_bytes(Ppub, _Ppub);
+	
+	element_printf("P1 =%B\n",P1);
+	element_printf("P2 =%B\n",P2);
+	element_printf("Ppub =%B\n",Ppub);
+}
+unsigned char* _sk_kem_enc(unsigned char* _ID, int* len){
+	int keylength = 128;
+	int uLen, vLen, dataLen;
+	unsigned char* data = NULL;
+	unsigned char* _U;
+	unsigned char* _V;
+	unsigned char aes_key[keylength];
+	int i = 0 ;
+
+	element_t r, Q, U, V, gr, m;
+	element_t IDa, P1_ID, H2_gr;
+
+	mpz_t mpz_gr, mpz_m, mpz_V;
+
+    	memset(aes_key, 0, sizeof(aes_key));
+    	
+	//m <- {0,1]^n
+	if (!RAND_bytes(aes_key, keylength)){
+        	exit(-1);
+	}
+	aes_key[keylength-1] = '\0';
+
+	printf_byte(aes_key, keylength);
+
+	mpz_init(mpz_gr);
+	mpz_init(mpz_m);
+	mpz_init(mpz_V);
+
+	element_init_G1(P1_ID, pairing);
+	element_init_G1(Q, pairing);
+	element_init_G1(U, pairing);
+
+	element_init_GT(gr, pairing);
+
+	element_init_Zr(m, pairing);
+	element_init_Zr(IDa, pairing);
+	element_init_Zr(V, pairing);
+
+	element_from_bytes(m, aes_key);
+	
+	//r <- H3(m)
+
+	element_printf("m = %B\n",m);
+
+	printf("KEM-Enc ID[%d]:%s\n",strlen(_ID),_ID);
+	element_from_hash(IDa, _ID, strlen(_ID)); //H1(ID)
+	element_pow_zn(P1_ID, P1, IDa); //p1^H1(ID)
+	element_mul(Q,Ppub,P1_ID); //Q <- R*P1^H1(ID) R=Ppub
+
+	//element_printf("IDa = %B\n",IDa);
+	//element_printf("P1_ID = %B\n",P1_ID);
+	//element_printf("P1 = %B\n",P1);
+	//element_printf("Q = %B\n",Q);
+
+	element_pow_zn(U, Q, m); //U <- Q^r
+	element_pow_zn(gr,g,m); // e(P1, P2)^r
+
+	element_printf("gr =%B\n",gr);
+
+	element_to_mpz(mpz_gr,gr);
+	element_to_mpz(mpz_m,m);
+	mpz_xor(mpz_V,mpz_m,mpz_gr); //V <- m xor gr
+	element_set_mpz(V, mpz_V);
+
+	//element_printf("U = %B\n", U);
+	element_printf("V = %B\n", V);
+
+	uLen = element_length_in_bytes(U);
+	vLen = element_length_in_bytes(V);
+	
+	_U = pbc_malloc(uLen);
+	_V = pbc_malloc(vLen);
+	
+	element_to_bytes(_U, U);
+	element_to_bytes(_V, V);
+	
+	dataLen = uLen + vLen + 4;
+	data = (unsigned char*)malloc(dataLen);
+	i = 0;
+	
+	data[i++] = uLen << 8;
+	data[i++] = uLen << 0;
+	memcpy(&data[i], _U, uLen);
+	i += uLen;
+	
+	data[i++] = vLen << 8;
+	data[i++] = vLen << 0;
+	memcpy(&data[i], _V, vLen);
+	i += vLen;
+
+	//printf_byte(data, dataLen);
+
+	*len = dataLen;
+
+	return data;
+}
+
+unsigned char* _sk_kem_dec(unsigned char* _enc){
+	int uLen = 0, vLen = 0, mLen = 0;
+	unsigned char* _U = NULL;
+	unsigned char* _V = NULL;
+	unsigned char* _m = NULL;
+	int i = 0;
+
+	element_t U, V, m, a;
+	mpz_t mpz_gp, mpz_V, mpz_W, mpz_M, mpz_a;
+
+	printf("_SK_KEM_DEC \n");
+
+	element_init_G1(U, pairing);
+	//element_init_GT(gp, pairing);
+
+	element_init_GT(a, pairing);
+
+	element_init_Zr(V, pairing);
+	element_init_Zr(m, pairing);
+
+	mpz_init(mpz_gp);
+	mpz_init(mpz_V);
+	mpz_init(mpz_W);
+	mpz_init(mpz_M);	
+	mpz_init(mpz_a);
+
+	uLen = _enc[i++] >> 8;
+	uLen |= _enc[i++] >> 0;
+	_U = (unsigned char*) malloc(uLen);
+	memcpy(_U, &_enc[i], uLen);
+	i += uLen;
+	element_from_bytes(U,_U);
+
+	vLen = _enc[i++] >> 8;
+	vLen |= _enc[i++] >> 0;
+	_V = (unsigned char*) malloc(vLen);
+	memcpy(_V, &_enc[i], vLen);
+	i += vLen;
+	element_from_bytes(V,_V);
+
+	//element_printf("U = %B\n", U);
+	element_printf("V = %B\n", V);
+
+	element_pairing(a, U, Da); //a <- e(U, IDa)
+	
+	element_printf("a = %B\n",a);
+
+	element_to_mpz(mpz_V, V);
+	element_to_mpz(mpz_a, a);
+	mpz_xor(mpz_M, mpz_V, mpz_a); //m <- v xor a
+
+	element_set_mpz(m, mpz_M);
+	element_printf("m = %B\n",m);
+	
+	mLen = element_length_in_bytes(m);
+	_m = (unsigned char*) malloc(mLen);
+	element_to_bytes(_m, m);
+
+	return _m;
+}
+
+unsigned char* _sk_gen_key(unsigned char *ID){
+	element_t IDa;
+	element_t Da;
+	element_t temp1;
+
+	element_init_G2(Da, pairing);
+	element_init_Zr(IDa, pairing);
+	element_init_Zr(temp1, pairing);
+
+	unsigned char *_Da;
+	int DaLen = 0;
+
+	printf("Extract. [%d]%s\n",strlen(ID), ID);
+	element_from_hash(IDa,ID,strlen(ID)); //H1(IDa)
+	element_printf("IDa =%B \n",IDa);
+	element_add(temp1, s, IDa);
+	element_invert(temp1, temp1);
+	//element_div(Da, P2, temp1);
+	element_mul_zn(Da,P2, temp1);
+	element_printf("Da =%B \n", Da);
+
+	DaLen = element_length_in_bytes(Da);
+	_Da = pbc_malloc(DaLen);
+	element_to_bytes(_Da, Da);
+
+	element_clear(IDa);
+	element_clear(Da);
+	element_clear(temp1);
+
+	return _Da;
+}
+
+unsigned char* extractDa(pairing_t pairing, unsigned char *ID, element_t s, element_t P2){
+	element_t IDa;
+	element_t Da;
+	element_t temp1;
+
+	element_init_G2(Da, pairing);
+	element_init_Zr(IDa, pairing);
+	element_init_Zr(temp1, pairing);
+
+	unsigned char *_Da;
+	int DaLen = 0;
+
+	printf("Extract. [%d]%s\n",strlen(ID), ID);
+	element_from_hash(IDa,ID,strlen(ID)); //H1(IDa)
+	element_printf("IDa =%B \n",IDa);
+	element_add(temp1, s, IDa);
+	element_invert(temp1, temp1);
+	//element_div(Da, P2, temp1);
+	element_mul_zn(Da,P2, temp1);
+	element_printf("Da =%B \n", Da);
+
+	DaLen = element_length_in_bytes(Da);
+	_Da = pbc_malloc(DaLen);
+	element_to_bytes(_Da, Da);
+
+	element_clear(IDa);
+	element_clear(Da);
+	element_clear(temp1);
+
+	return _Da;
+}

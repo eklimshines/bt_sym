@@ -1,0 +1,251 @@
+#include "main.h"
+
+static int blue_sock = -1;
+static int blue_conn = -1;
+static CLTSESSION_t bluesession = 0;
+SKMIB_t skmib;
+
+void client_setconn(int conn);
+int client_getconn(void);
+
+void blue_setsock(int sock);
+int blue_getsock(void);
+int blue_disconnect(void);
+int blue_open(void);
+void blue_send(uint8_t *data, int length);
+
+CLTSESSION_t blue_setsession(CLTSESSION_t session){
+    bluesession = session;
+    return bluesession;
+}
+
+CLTSESSION_t blue_getsession(void){
+    return bluesession;
+}
+
+void blue_setconn(int conn){
+	blue_conn = conn;
+}
+
+int blue_getconn(void){
+	return blue_conn;
+}
+
+void blue_setsock(int sock){
+    blue_sock = sock;
+}
+
+int blue_getsock(void){
+    return blue_sock;
+}
+
+int blue_disconnect(void){	
+	int sock = -1;
+	sock = blue_getsock();
+	if(sock>=0) close(sock);
+	blue_setsock(-1);
+	blue_setconn(-1);
+	return sock;
+}
+
+int blue_open(){
+	struct sockaddr_l2 loc_addr = { 0 }, rem_addr = { 0 };
+	
+	int ss, client, status;
+    	int psm = 0x1001;
+	int rbind = -1, rlisten = -1;
+	socklen_t opt = sizeof(rem_addr);
+
+	printf("Bluetooth socket open\n");
+
+	// allocate socket
+    	ss = socket(AF_BLUETOOTH, SOCK_SEQPACKET, BTPROTO_L2CAP);
+
+    	// bind socket to port 0x1001 of the first available 
+    	// bluetooth adapter
+    	loc_addr.l2_family = AF_BLUETOOTH;
+	loc_addr.l2_bdaddr = *BDADDR_ANY;
+	//loc_addr.l2_psm = htobs(0x1001);
+
+	loc_addr.l2_psm = htobs(psm);
+	rbind = bind(ss, (struct sockaddr *)&loc_addr, sizeof(loc_addr));
+	
+	// put socket into listening mode
+	rlisten = listen(ss, 1);
+
+	printf("Bluetooth L2cap Server sock[%d] open[%d,%d] port[%d]\n", ss, rbind, rlisten, psm);
+
+	blue_setsock(ss);
+
+	return ss;
+}
+
+void* bluetooth_recv_thread(void *arg){
+	char buf[1024] = { 0 };
+	int bytes_read;
+	int client = 0;
+
+	printf("Bluetooth RECV thread\n");
+
+	while(1){
+		client = blue_getconn();
+		// read data from the client
+		if(client > 0){
+
+			bytes_read = read(client, buf, sizeof(buf));
+	    		if( bytes_read > 0 ) {
+        			printf("received [%s]\n", buf);
+			}
+		}
+		usleep(1000);
+	}
+}
+/*
+void* bluetooth_accpet_thread(void *arg){
+
+    struct sockaddr_l2 loc_addr = { 0 }, rem_addr = { 0 };
+    char buf[1024] = { 0 };
+    int s, client, bytes_read;
+    socklen_t opt = sizeof(rem_addr);
+
+    // allocate socket
+    s = socket(AF_BLUETOOTH, SOCK_SEQPACKET, BTPROTO_L2CAP);
+
+    // bind socket to port 0x1001 of the first available 
+    // bluetooth adapter
+    loc_addr.l2_family = AF_BLUETOOTH;
+    loc_addr.l2_bdaddr = *BDADDR_ANY;
+    loc_addr.l2_psm = htobs(0x1001);
+
+    bind(s, (struct sockaddr *)&loc_addr, sizeof(loc_addr));
+
+    // put socket into listening mode
+    listen(s, 1);
+
+    // accept one connection
+    client = accept(s, (struct sockaddr *)&rem_addr, &opt);
+
+    ba2str( &rem_addr.l2_bdaddr, buf );
+    fprintf(stderr, "accepted connection from %s\n", buf);
+
+    memset(buf, 0, sizeof(buf));
+
+    // read data from the client
+    bytes_read = read(client, buf, sizeof(buf));
+    if( bytes_read > 0 ) {
+        printf("received [%s]\n", buf);
+    }
+
+    // close connection
+    close(client);
+    close(s);
+
+}
+*/
+void* bluetooth_accpet_thread(void *arg){
+	int ss= 0, conn = 0,client = 0;
+	char ID[1024] = { 0 }, buf[1024] = {0};
+	struct sockaddr_l2 rem_addr = { 0 };
+
+	socklen_t opt = sizeof(rem_addr);
+
+	ss= blue_open();
+
+	printf("bluetooth_accpet_threadthread\n");
+
+	while(1){
+    		ss = blue_getsock();
+		//listen(ss, 1);
+		printf("blue sock : %d\n", ss);
+		if(ss >=0){
+			// accept one connection
+			client = accept(ss, (struct sockaddr *)&rem_addr, &opt);
+			printf("client :%d\n",client);
+			if(client >0){
+			
+				memset(ID, 0, sizeof(ID));
+    				ba2str( &rem_addr.l2_bdaddr, ID );
+    				fprintf(stderr, "accepted connection from %s\n", ID);
+				memset(buf, 0, sizeof(buf));
+				blue_setconn(client);
+				
+				//Gen Enc
+				sendEnc(ID);
+			}
+	    		
+		}
+    	}
+
+    //close connection
+    close(client);
+    close(ss);
+}
+
+void blue_send(unsigned char* data, int len){
+	int sock = blue_getconn();
+	int status = 0;
+
+	printf("Blue_Send \n");
+
+	if(sock>0){
+		status = write(sock, data, len);
+		if(status < 0) printf("Blue Server L2CAP Send Failed\n");
+		else printf("Blue Server  Send Success\n");
+	}
+}
+
+void* sdp_search_thread(void *arg){
+	int rst = -2;
+	pthread_t l2capid;
+	int ret = 0;
+	int err = 0;
+	int psm = 0;
+	printf("SDP SEARCH thread\n");
+	sleep(1);
+	while(1){
+		rst = sdp_search(&psm);
+		printf("SDP Search Result:%d\n", rst);
+		if(rst == 1) {
+			err = pthread_create(&l2capid, NULL ,l2cap_thread,(void *)&psm);
+			if(err!=0) printf("Create L2CAP Thread Error[%d]\n",err);
+			
+			err = pthread_join(l2capid, (void**)&ret);
+			if(err!=0) printf("Bluetooth L2CAP Thread Return[%d][%d]\n",err,ret);
+			break;
+		}
+		sleep(1);
+	}
+}
+
+void* bluetooth_thread(void *arg){
+	pthread_t blueid;
+	pthread_t blue_rxid;
+	pthread_t findsdpid;
+	int ret = 0;
+	int err = 0;
+
+	if(skmib._neighborAuth == 1){
+
+		err = pthread_create(&findsdpid, NULL ,sdp_search_thread,NULL);
+		if(err!=0) printf("Create Bluetooth SDP Thread Error[%d]\n",err);
+	}
+
+	err = pthread_create(&blueid, NULL ,bluetooth_accpet_thread,NULL);
+	if(err!=0) printf("Create Bluetooth Thread Error[%d]\n",err);
+
+	err = pthread_create(&blue_rxid, NULL, bluetooth_recv_thread,NULL);
+	if(err!=0) printf("Create Bluetooth RX Thread Error[%d]\n",err);
+
+	err = pthread_join(blueid, (void**)&ret);
+	if(err!=0) printf("Bluetooth Thread Return[%d][%d]\n",err,ret);
+
+	err = pthread_join(blue_rxid, (void**)&ret);
+	if(err!=0) printf("Bluetooth RX Thread Return[%d][%d]\n",err,ret);
+
+	if(skmib._neighborAuth == 1){
+
+		err = pthread_join(findsdpid, (void**)&ret);
+		if(err!=0) printf("Bluetooth SDP Thread Return[%d][%d]\n",err,ret);
+	}
+
+}
