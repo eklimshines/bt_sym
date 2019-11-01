@@ -58,10 +58,10 @@ int main(int argc, char **argv)
     //readParamNeighbor();
 
     init_sqlite3();
-    init_sqlite3_param();
+    //init_sqlite3_param();
 
     if(skmib._userSetup == 1) _sk_setup();
-    if(skmib._userAuth == 1) select_param(); //_sk_setup_load();
+    if(skmib._userAuth == 1) readParamCon(); //select_param(); //_sk_setup_load();
     if(skmib._neighborAuth == 1) readParamNeighbor();
 
     //_sk_setup_key(_sk_gen_key(cfg.maindevicemac));

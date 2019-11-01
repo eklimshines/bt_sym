@@ -329,7 +329,7 @@ void _sk_setup(){
 	//printf("%s %s %s \n", _P1, _P2, _s);
 
 	//insert_param(1, _P1, _P2, _s);
-	saveParamCona(_P1, P1Len,  P2, P2Len, _s, sLen);
+	saveParamCona(_P1, P1Len,  _P2, P2Len, _s, sLen);
 }
 
 void _sk_setup_key(unsigned char* _Da){
@@ -628,12 +628,12 @@ unsigned char* _sk_gen_key(unsigned char *ID){
 	element_t Da;
 	element_t temp1;
 
+	unsigned char *_Da;
+	int DaLen = 0;
+
 	element_init_G2(Da, pairing);
 	element_init_Zr(IDa, pairing);
 	element_init_Zr(temp1, pairing);
-
-	unsigned char *_Da;
-	int DaLen = 0;
 
 	printf("Extract. [%d]%s\n",strlen(ID), ID);
 	element_from_hash(IDa,ID,strlen(ID)); //H1(IDa)
@@ -647,6 +647,8 @@ unsigned char* _sk_gen_key(unsigned char *ID){
 	DaLen = element_length_in_bytes(Da);
 	_Da = pbc_malloc(DaLen);
 	element_to_bytes(_Da, Da);
+
+	printf("GenKeyDaLen : %d\n", DaLen);
 
 	element_clear(IDa);
 	element_clear(Da);
@@ -660,12 +662,12 @@ unsigned char* extractDa(pairing_t pairing, unsigned char *ID, element_t s, elem
 	element_t Da;
 	element_t temp1;
 
+	unsigned char *_Da;
+	int DaLen = 0;
+
 	element_init_G2(Da, pairing);
 	element_init_Zr(IDa, pairing);
 	element_init_Zr(temp1, pairing);
-
-	unsigned char *_Da;
-	int DaLen = 0;
 
 	printf("Extract. [%d]%s\n",strlen(ID), ID);
 	element_from_hash(IDa,ID,strlen(ID)); //H1(IDa)
@@ -679,6 +681,8 @@ unsigned char* extractDa(pairing_t pairing, unsigned char *ID, element_t s, elem
 	DaLen = element_length_in_bytes(Da);
 	_Da = pbc_malloc(DaLen);
 	element_to_bytes(_Da, Da);
+
+	printf("extract Da Len: %d\n", DaLen);
 
 	element_clear(IDa);
 	element_clear(Da);
