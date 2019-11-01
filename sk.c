@@ -328,7 +328,8 @@ void _sk_setup(){
 
 	//printf("%s %s %s \n", _P1, _P2, _s);
 
-	insert_param(1, _P1, _P2, _s);
+	//insert_param(1, _P1, _P2, _s);
+	saveParamCona(_P1, P1Len,  P2, P2Len, _s, sLen);
 }
 
 void _sk_setup_key(unsigned char* _Da){
@@ -352,6 +353,118 @@ void _sk_setup_param(unsigned char* _P1, unsigned char* _P2, unsigned char* _Ppu
 	element_printf("P2 =%B\n",P2);
 	element_printf("Ppub =%B\n",Ppub);
 }
+
+
+void setPublicParamController(unsigned char* data, int len){
+	unsigned char* _P1 = NULL;
+	unsigned char* _P2 = NULL;
+	unsigned char* _s = NULL;
+
+	int i =0;
+	int P1Len = 0, P2Len = 0, sLen = 0;
+
+	printf("SetPublicParamController \n");
+
+	//printf_byte(data, len);
+
+	element_init_G1(Ppub, pairing);
+	element_init_G1(P1, pairing);
+	element_init_G2(P2, pairing);
+	element_init_GT(g, pairing);
+	element_init_Zr(s, pairing);
+
+	//element_init_Zr(s, pairing);
+
+	//P1Len = data[i++] << 8;
+	//P1Len |= data[i++] << 0;
+
+	P1Len = data[i++];
+	_P1 = (unsigned char*) malloc(P1Len);
+	memcpy(_P1, &data[i], P1Len);
+	i += P1Len;
+
+	P2Len = data[i++];
+	_P2 = (unsigned char*) malloc(P2Len);
+	memcpy(_P2, &data[i], P2Len);
+	i += P2Len;
+
+	sLen = data[i++];
+	_s = (unsigned char*) malloc(sLen);
+	memcpy(_s, &data[i], sLen);
+	i += sLen;
+
+	element_from_bytes(P1, _P1);
+	element_from_bytes(P2, _P2);
+	element_from_bytes(s, _s);
+
+	element_printf("P1 =%B\n", P1);
+	element_printf("P2 =%B\n", P2);
+
+    	element_mul_zn(Ppub,P1,s);
+	element_printf("Ppub =%B\n", Ppub);
+	
+    	element_pairing(g, P1, P2);
+    	element_printf("g =%B\n",g);
+}
+
+void setPublicParamNeighbor(unsigned char* data, int len){
+	unsigned char* _P1 = NULL;
+	unsigned char* _P2 = NULL;
+	unsigned char* _Ppub = NULL;
+	unsigned char* _Da = NULL;
+
+	int i =0;
+	int P1Len = 0, P2Len = 0, PpubLen = 0, DaLen = 0;
+
+	printf("SetPublicParamNeighbor \n");
+
+	//printf_byte(data, len);
+
+	element_init_G1(Ppub, pairing);
+	element_init_G1(P1, pairing);
+	element_init_G2(P2, pairing);
+	element_init_GT(g, pairing);
+	//element_init_Zr(s, pairing);
+	element_init_G2(Da, pairing);
+
+	//P1Len = data[i++] << 8;
+	//P1Len |= data[i++] << 0;
+
+	P1Len = data[i++];
+	_P1 = (unsigned char*) malloc(P1Len);
+	memcpy(_P1, &data[i], P1Len);
+	i += P1Len;
+
+	P2Len = data[i++];
+	_P2 = (unsigned char*) malloc(P2Len);
+	memcpy(_P2, &data[i], P2Len);
+	i += P2Len;
+
+	PpubLen = data[i++];
+	_Ppub = (unsigned char*) malloc(PpubLen);
+	memcpy(_Ppub, &data[i], PpubLen);
+	i += PpubLen;
+
+	DaLen = data[i++];
+	_Da = (unsigned char*) malloc(DaLen);
+	memcpy(_Da, &data[i], DaLen);
+	i += DaLen;
+
+	element_from_bytes(P1, _P1);
+	element_from_bytes(P2, _P2);
+	element_from_bytes(Ppub, _Ppub);
+	element_from_bytes(Da, _Da);
+
+	element_printf("P1 =%B\n", P1);
+	element_printf("P2 =%B\n", P2);
+	element_printf("Ppub =%B\n", Ppub);
+	element_printf("Da =%B\n", Da);
+	
+    	element_pairing(g, P1, P2);
+    	element_printf("g =%B\n",g);
+
+}
+
 unsigned char* _sk_kem_enc(unsigned char* _ID, int* len){
 	int keylength = 128;
 	int uLen, vLen, dataLen;

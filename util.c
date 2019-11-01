@@ -1,12 +1,11 @@
 #include "main.h"
 
+CONFIG_t cfg;
 char* get_bt_uuid(){
 
-	static uint32_t service_uuid_int[] = { 0, 0, 0, 0xABCD };
+	printf("Get BT UUID[%d]: %s\n",strlen(cfg.myuuid), cfg.myuuid);
 
-	printf("Get BT UUID[%d]: %s\n",strlen(service_uuid_int),service_uuid_int);
-
-	return &service_uuid_int;
+	return cfg.myuuid ;
 }
 
 char* get_bt_addr(){
@@ -173,13 +172,14 @@ void config_init(CONFIG_t *config){
 	char* strmainuuid = "MAINDEVICEUUID";
 	char* struserip = "USERIP";
 	char* struserport = "USERPORT";
-
+	char* strmyuuid = "MYUUID";
 	int length = 0;
 	int i = 0;
 
 	char maindeviceip[16];
 	char maindevicemac[20];
 	char maindeviceuuid[40];
+	char myuuid[40];
 	char userip[20];
 
 	int maindeviceport;
@@ -212,6 +212,11 @@ void config_init(CONFIG_t *config){
 	memcpy(config->maindeviceuuid, sbuf, strlen(sbuf));
 
 	memset(sbuf,0,sizeof(sbuf));
+	memset(config->myuuid, 0, sizeof(config->myuuid));
+	length = readconfig(buf, rcnt, strmyuuid, sbuf);
+	memcpy(config->myuuid, sbuf, strlen(sbuf));
+
+	memset(sbuf,0,sizeof(sbuf));
 	memset(config->userip, 0, sizeof(config->userip));
 	length = readconfig(buf, rcnt, struserip, sbuf);
 	memcpy(config->userip, sbuf, strlen(sbuf));
@@ -231,6 +236,7 @@ void config_init(CONFIG_t *config){
 	printf("MainDevice PORT = %d\n",config->maindeviceport);
 	printf("USER IP = %s\n",config->userip);
 	printf("USER PORT = %d\n",config->userport);
+	printf("My UUID = %s\n", config->myuuid);
 
 	memset(sbuf,0,sizeof(sbuf));
 }

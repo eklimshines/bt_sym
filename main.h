@@ -53,6 +53,7 @@ typedef struct tCONFIG{
 	char maindeviceip[16];
 	char maindevicemac[20];
 	char maindeviceuuid[40];
+	char myuuid[40];
 	char userip[20];
 	int maindeviceport;
 	int userport;
@@ -130,6 +131,8 @@ int _str2uuid(const char* uuid_str, uuid_t* uuid);
 void setPublicParam(unsigned char* data, int len);
 unsigned char* getPublicParam(int *len);
 unsigned char* getPpub(int *len);
+void setPublicParamNeighbor(unsigned char* data, int len);
+void setPublicParamController(unsigned char* data, int len);
 
 unsigned char* HMAC_SHA512(unsigned char *key, unsigned char *data, unsigned int *len2);
 
@@ -142,6 +145,12 @@ void* l2cap_thread(void *arg);
 
 void config_init(CONFIG_t *config);
 
+//void saveParamNeighbor(unsigned char* _P1, unsigned char* _P2, unsigned char* Ppub, unsigned char* _Da);
+void readParamNeighbor();
+void saveParamNeighbor(unsigned char* data, int len);
+
+void readParamCon();
+void saveParamCona(unsigned char* P1, int P1Len, unsigned char* P2, int P2Len, unsigned char* s, int sLen);
 extern pairing_t pairing;
 extern SKMIB_t skmib;
 extern CONFIG_t cfg;

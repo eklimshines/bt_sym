@@ -328,6 +328,7 @@ void parse_key(unsigned char* data){
 	int P2Len = 0;
 	int PpubLen = 0;
 	int keyLen = 0;
+	int len =0;
 
 	char* _Da;
 	char* _P1;
@@ -339,27 +340,38 @@ void parse_key(unsigned char* data){
 	P1Len = data[i++];
 	_P1 = (unsigned char*)malloc(P1Len);
 	memcpy(_P1, &data[i], P1Len);
+	_P1[P1Len] = '\0';
 	i += P1Len;
 	
 	P2Len = data[i++];
 	_P2 = (unsigned char*)malloc(P2Len);
 	memcpy(_P2, &data[i], P2Len);
 	i += P2Len;
+	_P2[P2Len] = '\0';
 
 	PpubLen = data[i++];
 	_Ppub = (unsigned char*)malloc(PpubLen);
 	memcpy(_Ppub, &data[i], PpubLen);
 	i += PpubLen;
+	_Ppub[PpubLen] = '\0';
 
 	keyLen = data[i++];
 	_Da = (unsigned char*)malloc(keyLen);
 	memcpy(_Da, &data[i], keyLen);
 	i += keyLen;
-	
+	_Da[keyLen] = '\0';
+
+	//printf("get _Da: ");
+	//printf_byte(_Da, keyLen);
+
 	_sk_setup_param(_P1, _P2, _Ppub);
 	_sk_setup_key(_Da);
 
-	insert_param_neighbor(1, _P1, _P2, _Ppub, _Da);
+	//insert_param_neighbor(1, _P1, _P2, _Ppub, _Da);
+
+	len = P1Len + P2Len + PpubLen + keyLen + 4;
+	saveParamNeighbor(data, len);
+	//saveParamNeighbor(_P1, _P2, _Ppub, _Da);
 
 	printf_byte(_Da, keyLen);
 }
