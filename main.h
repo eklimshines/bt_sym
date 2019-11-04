@@ -134,17 +134,18 @@ unsigned char* getPpub(int *len);
 void setPublicParamNeighbor(unsigned char* data, int len);
 void setPublicParamController(unsigned char* data, int len);
 
-unsigned char* HMAC_SHA512(unsigned char *key, unsigned char *data, unsigned int *len2);
+unsigned char* HMAC_SHA512(unsigned char *key, int keyLen, unsigned char *data, unsigned int *len2);
 
 void sendTag(unsigned char* data);
 void sendEnc(char* ID);
 unsigned char* _sk_kem_enc(unsigned char *ID, int* len);
-unsigned char* _sk_kem_dec(unsigned char* _enc);
+unsigned char* _sk_kem_dec(unsigned char* _enc, int* keyLen);
 
 void* l2cap_thread(void *arg);
 
 void config_init(CONFIG_t *config);
 
+void l2cap_send(unsigned char* data, int len);
 //void saveParamNeighbor(unsigned char* _P1, unsigned char* _P2, unsigned char* Ppub, unsigned char* _Da);
 void readParamNeighbor();
 void saveParamNeighbor(unsigned char* data, int len);

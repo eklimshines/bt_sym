@@ -3,12 +3,42 @@
 static element_t Ppub,P1,P2,s,g,Da;
 pairing_t pairing;
 
+unsigned char* getPpub(int *len);
+
+void sendTaga(unsigned char* _tag, int tagLen){
+	int i = 0;
+	int dataLen = 0;
+
+	unsigned char* data;
+
+	dataLen = 6 + tagLen;
+	data = (unsigned char*) malloc(dataLen);
+	
+	data[i++] = 0x02;
+
+	data[i++] = dataLen >> 8;
+	data[i++] = dataLen >> 0;
+
+	data[i++] = 0x07;
+
+	data[i++] = tagLen;
+	memcpy(&data[i], _tag, tagLen);
+	i += tagLen;
+	
+	data[i++] = 0x03;
+
+	l2cap_send(data, dataLen);
+}
+
 void sendTag(unsigned char* data){
 	int i = 0;
 	int macLen = 0;
 	int paramLen = 0;
 	int encLen = 0;
 	int len = 0;
+	int keyLen = 0;
+	int pubLen = 0;
+	int myMacLen = 0;
 
 	unsigned char* _enc = NULL;
 	unsigned char* _param = NULL;
@@ -17,10 +47,25 @@ void sendTag(unsigned char* data){
 	unsigned char* _tag = NULL;
 	unsigned char* _dec = NULL;
 
+	unsigned char* myPub = NULL;
+	unsigned char* myMac = NULL;
+
 	macLen = data[i++];
 	_MAC = (unsigned char*) malloc(macLen);
 	memcpy(_MAC, &data[i], macLen);
 	i += macLen;
+
+	myMac = get_bt_addr();
+	myMacLen = strlen(myMac);
+
+	if(myMacLen != macLen){
+		printf("Mac Len failed\n");
+	}else {
+		printf("Mac len Correct\n");
+		if(memcmp(myMac, _MAC, myMacLen) != 0){
+			printf("MAC cmp failed\n");
+		}else printf("MAC cmp correct\n");
+	}
 
 	paramLen = data[i++] << 8;
 	paramLen |= data[i++] << 0;
@@ -28,16 +73,36 @@ void sendTag(unsigned char* data){
 	memcpy(_param, &data[i], paramLen);
 	i += paramLen;
 
+	myPub = getPpub(&pubLen);
+		
+	if(pubLen != paramLen){
+		printf("Pub Len failed\n");
+	}else {
+		printf("Pub len Correct\n");
+		if(memcmp(myPub, _param, pubLen) != 0){
+			printf("Pub cmp failed\n");
+		}else printf("pub cmp correct\n");
+	}
+
 	encLen = data[i++] << 8;
 	encLen |= data[i++] << 0;
 	_enc = (unsigned char*) malloc(encLen);
 	memcpy(_enc, &data[i], encLen);
 	i += encLen;
 
-	_key = _sk_kem_dec(_enc);
+	printf("recv enc[%d]:  ",encLen);
+	printf_byte(_enc, encLen);
 
-	_tag = HMAC_SHA512(_key, data, &len);
+	_key = _sk_kem_dec(_enc, &keyLen);
 
+	_tag = HMAC_SHA512(_key, keyLen, data, &len);
+
+	printf("_tag[%d]: ", len);
+	printf_byte(_tag, len);
+
+	sendTaga(_tag, len);
+
+	//_tag = HMAC_SHA1(_key, data, &len);
 }
 
 void sendEnc(char* ID){
@@ -97,6 +162,8 @@ void sendEnc(char* ID){
 unsigned char* getPpub(int *len){
 	unsigned char* data;
 	int PpubLen;
+
+	PpubLen = element_length_in_bytes(Ppub);
 
 	data = (unsigned char*) malloc(PpubLen);
 	data = pbc_malloc(PpubLen);
@@ -562,11 +629,12 @@ unsigned char* _sk_kem_enc(unsigned char* _ID, int* len){
 	return data;
 }
 
-unsigned char* _sk_kem_dec(unsigned char* _enc){
-	int uLen = 0, vLen = 0, mLen = 0;
+unsigned char* _sk_kem_dec(unsigned char* _enc, int* keyLen){
+	int uLen = 0, vLen = 0, mLen = 0, aLen = 0;
 	unsigned char* _U = NULL;
 	unsigned char* _V = NULL;
 	unsigned char* _m = NULL;
+	unsigned char* _a = NULL;
 	int i = 0;
 
 	element_t U, V, m, a;
@@ -592,33 +660,71 @@ unsigned char* _sk_kem_dec(unsigned char* _enc){
 	uLen |= _enc[i++] >> 0;
 	_U = (unsigned char*) malloc(uLen);
 	memcpy(_U, &_enc[i], uLen);
+	_U[uLen] = '\0';
 	i += uLen;
 	element_from_bytes(U,_U);
+
+	printf("uLen[%d]: ", uLen);
+	printf_byte(_U, uLen);
 
 	vLen = _enc[i++] >> 8;
 	vLen |= _enc[i++] >> 0;
 	_V = (unsigned char*) malloc(vLen);
 	memcpy(_V, &_enc[i], vLen);
 	i += vLen;
-	element_from_bytes(V,_V);
+	//element_from_bytes(V,_V);
 
-	//element_printf("U = %B\n", U);
-	element_printf("V = %B\n", V);
+	printf("vLen[%d]: ", vLen);
+	printf_byte(_V, vLen);
+
+	element_printf("U = %B\n", U);
+	//element_printf("V = %B\n", V);
 
 	element_pairing(a, U, Da); //a <- e(U, IDa)
 	
 	element_printf("a = %B\n",a);
 
-	element_to_mpz(mpz_V, V);
+	//element_to_mpz(mpz_V, V);
 	element_to_mpz(mpz_a, a);
-	mpz_xor(mpz_M, mpz_V, mpz_a); //m <- v xor a
 
-	element_set_mpz(m, mpz_M);
-	element_printf("m = %B\n",m);
+	//gmp_printf("mpz_v = %Zd\n", mpz_V);
+	//gmp_printf("mpz_a = %Zd\n", mpz_a);
+
+	//mpz_xor(mpz_M, mpz_a, mpz_V); //m <- v xor a
+	//element_set_mpz(m, mpz_M);
 	
-	mLen = element_length_in_bytes(m);
-	_m = (unsigned char*) malloc(mLen);
-	element_to_bytes(_m, m);
+	//gmp_printf("mpz_M = %Zd\n", mpz_M);
+
+	aLen = element_length_in_bytes(a);
+	_a = (unsigned char*) malloc(aLen);
+	element_to_bytes(_a, a);
+
+	//printf("aLen:%d, vLen:%d\n", aLen, vLen);
+	//printf("_a : ");
+	//printf_byte(_a, aLen);
+	//printf("_V : ");
+	//printf_byte(_V, vLen);
+
+	_m = (unsigned char*) malloc(128);
+	for(i = 0; i < 128; i++)
+		_m[i] = _V[i] ^ _a[i];
+	//for(i = vLen; i < 128; i++)
+//		_m[i] = _a[i] ^ 0x0;
+
+	element_from_bytes(m,_m);
+
+	element_printf("m = %B\n",m);
+
+	//mLen = element_length_in_bytes(m);
+	//_m = (unsigned char*) malloc(mLen);
+	//element_to_bytes(_m, m);
+
+	*keyLen = 128;
+
+	element_clear(U);
+	element_clear(a);
+	element_clear(V);
+	element_clear(m);
 
 	return _m;
 }
