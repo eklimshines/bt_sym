@@ -66,6 +66,16 @@ typedef struct _AUTHMIB{
 	char _ENC[1024];
 }AUTHMIB_t;
 
+
+typedef struct _CHECK{
+	unsigned char MAC[20];
+	unsigned char KEY[128];
+	unsigned char CIPHER[260];
+	unsigned char UUID[40];
+	int socket;
+
+}CHECK_t;
+
 int aes_encrypt(unsigned char* in, unsigned char* out, int size, unsigned char* key, int KEY_BIT);
 int aes_decrypt(unsigned char* in, unsigned char* out, int size, unsigned char* key, int KEY_BIT);
 
@@ -115,6 +125,7 @@ int select_neighborByMAC(char* MAC);
 void _sk_setup();
 void _sk_close();
 unsigned char* _sk_gen_key(unsigned char* ID);
+void checkTag(unsigned char* data, int len);
 void _sk_setup_load(int row, int col, char** result);
 void _sk_setup_param(unsigned char* _P1, unsigned char* _P2, unsigned char* _Ppub);
 
@@ -154,4 +165,6 @@ void readParamCon();
 void saveParamCona(unsigned char* P1, int P1Len, unsigned char* P2, int P2Len, unsigned char* s, int sLen);
 extern pairing_t pairing;
 extern SKMIB_t skmib;
+
 extern CONFIG_t cfg;
+extern CHECK_t auth[8];

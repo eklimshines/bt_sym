@@ -5,6 +5,26 @@ pairing_t pairing;
 
 unsigned char* getPpub(int *len);
 
+
+void checkTag(unsigned char* data, int len){
+	int i = 0;
+	int tagLen = 0;
+	int myTagLen = 0;
+
+	unsigned char* _tag = NULL;
+	unsigned char* myTag = NULL;
+
+	tagLen = data[i++];
+	_tag = (unsigned char*)malloc(tagLen);
+	memcpy(_tag, &data[i], tagLen);
+	i += tagLen;
+
+	printf("_tag[%d]: ", tagLen);
+	printf_byte(_tag, tagLen);
+
+	//myTag = HMAC_SHA512(_key, keyLen, data, &myTaglen);	
+}
+
 void sendTaga(unsigned char* _tag, int tagLen){
 	int i = 0;
 	int dataLen = 0;

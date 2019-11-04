@@ -94,7 +94,8 @@ void* bluetooth_recv_thread(void *arg){
 
 			bytes_read = read(client, buf, sizeof(buf));
 	    		if( bytes_read > 0 ) {
-        			printf("received [%s]\n", buf);
+        			printf("received [%d]\n", bytes_read);
+				parse_role(buf);
 			}
 		}
 		usleep(1000);

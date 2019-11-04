@@ -494,6 +494,7 @@ void parse_role(unsigned char* data){
 		i++;
 		tagData = (unsigned char*) malloc(dataLen);
 		memcpy(tagData, &data[i], dataLen);
+		checkTag(tagData, dataLen);
 
 	}else if(data[i] == 0x08){
 		//Auth2
