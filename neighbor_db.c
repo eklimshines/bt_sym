@@ -175,7 +175,7 @@ int select_neighborByMAC(char* MAC){
 	if(ret != SQLITE_OK) printf("Fail Get Table Info!! \r\n");
 
 	printf("Sqlite3 Select Result Row:%d, Col:%d\n",row,col);
-
+/*
 	if(row >0){
 		for(i = 0; i <= row; i++){
 			printf("%s, %s, %s, %s, %s \n",
@@ -187,6 +187,7 @@ int select_neighborByMAC(char* MAC){
 //		printf("%d, %d, %d\n", strlen(result[i*col]), strlen(result[i*col+1]), strlen(result[i*col+2]));
 		}
 	}
+	*/
 	return row;
 
 }
@@ -224,7 +225,7 @@ unsigned char* select_neighborList(int* len){
 	if(ret != SQLITE_OK) printf("Fail Get Table Info!! \r\n");
 
 	printf("Sqlite3 Select Result Row:%d, Col:%d\n",row,col);
-
+/*
 	for(i = 0; i <= row; i++){
 		printf("%s, %s, %s, %s, %s \n",
 				result[i*col],
@@ -234,7 +235,7 @@ unsigned char* select_neighborList(int* len){
 				result[i*col + 4]);
 //		printf("%d, %d, %d\n", strlen(result[i*col]), strlen(result[i*col+1]), strlen(result[i*col+2]));
 	}
-
+*/
         data = enc_setup_neighborList(row, col, result, &dataLen);
 
 	*len = dataLen;

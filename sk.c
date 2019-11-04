@@ -124,7 +124,8 @@ void sendEnc(char* ID){
 		return NULL;
 	}else printf("MainDevice Send Enc Func\n");
 
-	_param = getPublicParam(&paramLen);
+	//_param = getPublicParam(&paramLen);
+	_param = getPpub(&paramLen);
 	_enc = _sk_kem_enc(ID, &encLen);
 
 	dataLen = 10 + encLen + macLen + paramLen;
@@ -534,10 +535,12 @@ void setPublicParamNeighbor(unsigned char* data, int len){
 
 unsigned char* _sk_kem_enc(unsigned char* _ID, int* len){
 	int keylength = 128;
-	int uLen, vLen, dataLen;
+	int uLen, vLen, dataLen, grLen, mLen;
 	unsigned char* data = NULL;
 	unsigned char* _U;
 	unsigned char* _V;
+	unsigned char* _gr;
+	unsigned char* _m;
 	unsigned char aes_key[keylength];
 	int i = 0 ;
 
@@ -593,20 +596,45 @@ unsigned char* _sk_kem_enc(unsigned char* _ID, int* len){
 
 	element_to_mpz(mpz_gr,gr);
 	element_to_mpz(mpz_m,m);
-	mpz_xor(mpz_V,mpz_m,mpz_gr); //V <- m xor gr
-	element_set_mpz(V, mpz_V);
 
-	//element_printf("U = %B\n", U);
-	element_printf("V = %B\n", V);
+	//gmp_printf("mpz_m = %Zd\n", mpz_m);
+	//gmp_printf("mpz_gr = %Zd\n", mpz_gr);
+
+
+	grLen = element_length_in_bytes(gr);
+	_gr = pbc_malloc(grLen);
+	element_to_bytes(_gr, gr);
+
+	printf("gr : %d, key :%d\n", grLen, keylength);
+	//printf("gr : ");
+	//printf_byte(gr, grLen);
+
+	_V = (unsigned char*) malloc(128);
+
+	for(i = 0; i < 128; i++)
+		_V[i] = _gr[i] ^ aes_key[i];
+	
+	//mpz_xor(mpz_V,mpz_m,mpz_gr); //V <- m xor gr
+	//printf_byte(_V, 128);
+	//element_from_bytes(V, _V);
+	
+	//element_set_mpz(V, mpz_V);
+
+	//gmp_printf("mpz_v = %Zd\n", mpz_V);
+
+	element_printf("U = %B\n", U);
+	//element_printf("V = %B\n", V);
 
 	uLen = element_length_in_bytes(U);
-	vLen = element_length_in_bytes(V);
+	//vLen = element_length_in_bytes(V);
 	
 	_U = pbc_malloc(uLen);
-	_V = pbc_malloc(vLen);
+	//_V = pbc_malloc(vLen);
 	
 	element_to_bytes(_U, U);
-	element_to_bytes(_V, V);
+	//element_to_bytes(_V, V);
+	vLen = 128;
+	printf("ulen:%d\n", uLen);
 	
 	dataLen = uLen + vLen + 4;
 	data = (unsigned char*)malloc(dataLen);
@@ -622,9 +650,18 @@ unsigned char* _sk_kem_enc(unsigned char* _ID, int* len){
 	memcpy(&data[i], _V, vLen);
 	i += vLen;
 
+	//printf_byte(_V, vLen);
 	//printf_byte(data, dataLen);
-
+	//printf("kem enc dataLen: %d\n", dataLen);
 	*len = dataLen;
+
+	element_clear(P1_ID);
+	element_clear(Q);
+	element_clear(U);
+	element_clear(gr);
+	element_clear(m);
+	element_clear(IDa);
+	element_clear(V);
 
 	return data;
 }

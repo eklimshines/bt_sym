@@ -189,7 +189,7 @@ void blue_send(unsigned char* data, int len){
 
 	if(sock>0){
 		status = write(sock, data, len);
-		if(status < 0) printf("Blue Server L2CAP Send Failed\n");
+		if(status < 0) printf("Blue Server L2CAP Send[%d] Failed %d\n", len, status);
 		else printf("Blue Server  Send Success\n");
 	}
 }
