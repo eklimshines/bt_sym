@@ -22,6 +22,8 @@ void saveParamCona(unsigned char* P1, int P1Len, unsigned char* P2, int P2Len, u
 	memcpy(&data[i], s, sLen);
 	i += sLen;
 	
+	printf_byte(data, dataLen);
+
 	saveParamCon(data, dataLen);
 }
 

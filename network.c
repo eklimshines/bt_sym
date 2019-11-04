@@ -78,12 +78,14 @@ void enc_setup_key_gen(int dev_num, unsigned char* mac){
 	int DaLen = 0;
 	int paramLen = 0;
 
-	_Da = _sk_gen_key(mac);
-	DaLen = strlen(_Da);
+	//while(1){
+		_Da = _sk_gen_key(mac);
+		DaLen = strlen(_Da);
+		printf("Da:%d \n",DaLen);
+		//if(DaLen == 128) break;
+	//}
 
 	param = getPublicParam(&paramLen);
-
-	printf("Da:%d \n",DaLen);
 
 	dataLen = DaLen + paramLen;
 	data = (unsigned char*)malloc(dataLen + HTLen);
