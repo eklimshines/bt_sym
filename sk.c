@@ -143,8 +143,8 @@ void sendTag(unsigned char* data){
 	memcpy(_enc, &data[i], encLen);
 	i += encLen;
 
-	printf("recv enc[%d]:  ",encLen);
-	printf_byte(_enc, encLen);
+	//printf("recv enc[%d]:  ",encLen);
+	//printf_byte(_enc, encLen);
 
 	_key = _sk_kem_dec(_enc, &keyLen);
 
@@ -156,7 +156,8 @@ void sendTag(unsigned char* data){
 	i += myMacLen;
 	memcpy(&_tagData[i], _enc, encLen);
 	
-	_tag = HMAC_SHA512(_key, keyLen, _tagData, &len);
+	//_tag = HMAC_SHA512(_key, keyLen, _tagData, &len);
+	_tag = HMAC_SHA1(_key, _tagData, &len);
 
 	printf("_tag[%d]: ", len);
 	printf_byte(_tag, len);
@@ -285,12 +286,12 @@ void setPublicParam(unsigned char* data, int len){
 	element_from_bytes(P2, _P2);
 	element_from_bytes(Ppub, _Ppub);
 
-	element_printf("P1 =%B\n", P1);
-	element_printf("P2 =%B\n", P2);
+	//element_printf("P1 =%B\n", P1);
+	//element_printf("P2 =%B\n", P2);
 	element_printf("Ppub =%B\n", Ppub);
 	
     	element_pairing(g, P1, P2);
-    	element_printf("g =%B\n",g);
+    	//element_printf("g =%B\n",g);
 
 }
 
@@ -302,8 +303,8 @@ unsigned char* getPublicParam(int *len){
 
 	printf("GetPublicParam\n");
 
-	element_printf("P1 =%B\n", P1);
-	element_printf("P2 =%B\n", P2);
+	//element_printf("P1 =%B\n", P1);
+	//element_printf("P2 =%B\n", P2);
 	element_printf("Ppub =%B\n", Ppub);
 
 
@@ -534,8 +535,8 @@ void setPublicParamController(unsigned char* data, int len){
 	element_from_bytes(P2, _P2);
 	element_from_bytes(s, _s);
 
-	element_printf("P1 =%B\n", P1);
-	element_printf("P2 =%B\n", P2);
+	//element_printf("P1 =%B\n", P1);
+	//element_printf("P2 =%B\n", P2);
 
     	element_mul_zn(Ppub,P1,s);
 	element_printf("Ppub =%B\n", Ppub);
@@ -626,7 +627,7 @@ unsigned char* _sk_kem_enc(unsigned char* _ID, int* len, int index){
 	}
 	aes_key[keylength-1] = '\0';
 
-	printf_byte(aes_key, keylength);
+	//printf_byte(aes_key, keylength);
 
 	mpz_init(mpz_gr);
 	mpz_init(mpz_m);
@@ -662,7 +663,7 @@ unsigned char* _sk_kem_enc(unsigned char* _ID, int* len, int index){
 	element_pow_zn(U, Q, m); //U <- Q^r
 	element_pow_zn(gr,g,m); // e(P1, P2)^r
 
-	element_printf("gr =%B\n",gr);
+	//element_printf("gr =%B\n",gr);
 
 	element_to_mpz(mpz_gr,gr);
 	element_to_mpz(mpz_m,m);
@@ -675,7 +676,7 @@ unsigned char* _sk_kem_enc(unsigned char* _ID, int* len, int index){
 	_gr = pbc_malloc(grLen);
 	element_to_bytes(_gr, gr);
 
-	printf("gr : %d, key :%d\n", grLen, keylength);
+	//printf("gr : %d, key :%d\n", grLen, keylength);
 	//printf("gr : ");
 	//printf_byte(gr, grLen);
 
@@ -692,7 +693,7 @@ unsigned char* _sk_kem_enc(unsigned char* _ID, int* len, int index){
 
 	//gmp_printf("mpz_v = %Zd\n", mpz_V);
 
-	element_printf("U = %B\n", U);
+	//element_printf("U = %B\n", U);
 	//element_printf("V = %B\n", V);
 
 	uLen = element_length_in_bytes(U);
@@ -704,7 +705,7 @@ unsigned char* _sk_kem_enc(unsigned char* _ID, int* len, int index){
 	element_to_bytes(_U, U);
 	//element_to_bytes(_V, V);
 	vLen = 128;
-	printf("ulen:%d\n", uLen);
+	//printf("ulen:%d\n", uLen);
 	
 	dataLen = uLen + vLen + 4;
 	data = (unsigned char*)malloc(dataLen);
@@ -771,8 +772,8 @@ unsigned char* _sk_kem_dec(unsigned char* _enc, int* keyLen){
 	i += uLen;
 	element_from_bytes(U,_U);
 
-	printf("uLen[%d]: ", uLen);
-	printf_byte(_U, uLen);
+	//printf("uLen[%d]: ", uLen);
+	//printf_byte(_U, uLen);
 
 	vLen = _enc[i++] >> 8;
 	vLen |= _enc[i++] >> 0;
@@ -781,15 +782,15 @@ unsigned char* _sk_kem_dec(unsigned char* _enc, int* keyLen){
 	i += vLen;
 	//element_from_bytes(V,_V);
 
-	printf("vLen[%d]: ", vLen);
-	printf_byte(_V, vLen);
+	//printf("vLen[%d]: ", vLen);
+	//printf_byte(_V, vLen);
 
-	element_printf("U = %B\n", U);
+	//element_printf("U = %B\n", U);
 	//element_printf("V = %B\n", V);
 
 	element_pairing(a, U, Da); //a <- e(U, IDa)
 	
-	element_printf("a = %B\n",a);
+	//element_printf("a = %B\n",a);
 
 	//element_to_mpz(mpz_V, V);
 	element_to_mpz(mpz_a, a);
