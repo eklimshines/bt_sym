@@ -192,6 +192,35 @@ int select_neighborByMAC(char* MAC){
 
 }
 
+char** select_neighborLista(int* r, int* c){
+
+	char *sql = "SELECT * FROM Neighbors";
+
+	char **result;
+	char *err_msg;
+	int row = 0;
+	int col = 0;
+	int ret = 0;
+	int i = 0;
+	int j = 0;
+
+	unsigned char* data = NULL;
+	int dataLen = 0;
+
+	ret = sqlite3_get_table(conn, sql, &result, &row, &col, &err_msg);
+	if(ret != SQLITE_OK) printf("Fail Get Table Info!! \r\n");
+
+	printf("Sqlite3 Select Lista Result Row:%d, Col:%d\n",row,col);
+
+
+	*r = row;
+	*c = col;
+
+	sqlite3_free_table(result);
+
+	return result;
+}
+
 unsigned char* select_neighborList(int* len){
 	char *sql = "SELECT * FROM Neighbors";
 

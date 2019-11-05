@@ -3,6 +3,7 @@
 pairing_t pairing;
 SKMIB_t skmib;
 CONFIG_t cfg;
+CHECK_t auth[8];
 
 void arg_parser(int argc, char **argv){
 	int i = 0;
@@ -64,6 +65,8 @@ int main(int argc, char **argv)
     if(skmib._userAuth == 1) readParamCon(); //select_param(); //_sk_setup_load();
     if(skmib._neighborAuth == 1) readParamNeighbor();
 
+    
+    if(skmib._neighborAuth == 1 || skmib._neighbor == 1) register_service();
     //_sk_setup_key(_sk_gen_key(cfg.maindevicemac));
 
     //_sk_kem_dec(_sk_kem_enc(cfg.maindevicemac, &len));
@@ -77,15 +80,18 @@ int main(int argc, char **argv)
     err = pthread_create(&networkid, NULL, network_thread, NULL);
     if(err!=0) printf("Create Network Thread Error[%d]\n",err);
     
-    err = pthread_create(&bluetoothid, NULL, bluetooth_thread, NULL);
-    if(err!=0) printf("Create Bluetooth Thread Error[%d]\n",err);
+    if(skmib._neighborAuth == 1 || skmib._neighbor == 1){
+    	err = pthread_create(&bluetoothid, NULL, bluetooth_thread, NULL);
+    	if(err!=0) printf("Create Bluetooth Thread Error[%d]\n",err);
+    }
 
     err = pthread_join(networkid,(void**)&ret);
     if(err!=0) printf("Network Thread Return[%d][%d]\n",err,ret);
     
-    err = pthread_join(bluetoothid,(void**)&ret);
-    if(err!=0) printf("Bluetooth Thread Return[%d][%d]\n",err,ret);
-
+    if(skmib._neighborAuth == 1 || skmib._neighbor == 1){
+    	err = pthread_join(bluetoothid,(void**)&ret);
+    	if(err!=0) printf("Bluetooth Thread Return[%d][%d]\n",err,ret);
+    }
     _sqlite3_close();
 
 }

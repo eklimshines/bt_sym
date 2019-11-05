@@ -4,6 +4,7 @@ static int blue_sock = -1;
 static int blue_conn = -1;
 static CLTSESSION_t bluesession = 0;
 SKMIB_t skmib;
+CHECK_t auth[8];
 
 void client_setconn(int conn);
 int client_getconn(void);
@@ -13,6 +14,7 @@ int blue_getsock(void);
 int blue_disconnect(void);
 int blue_open(void);
 void blue_send(uint8_t *data, int length);
+void* sdp_search_thread(void *arg);
 
 CLTSESSION_t blue_setsession(CLTSESSION_t session){
     bluesession = session;
@@ -195,17 +197,50 @@ void blue_send(unsigned char* data, int len){
 	}
 }
 
+void search_sdp_r(){
+	int i = 0;
+	int psm = 0;
+	int rst = 0;
+	int err = 0;
+	int ret = 0;
+
+	pthread_t findsdpid[8];
+
+	for(i = 0; i < 8; i++){
+		psm = 0;
+		if(auth[i].devId != 0){
+			rst = _sdp_search(auth[i].MAC, auth[i].UUID, &psm);
+
+			printf("SDP[%d] Search Result:%d\n",i, rst);
+			if(rst == 1){
+				
+				err = pthread_create(&findsdpid[i], NULL ,sdp_search_thread,(void *)&i);
+				if(err!=0) printf("Create Bluetooth SDP Thread[%d] Error[%d]\n",i, err);
+			}
+		}
+	}	
+	
+	for(i = 0; i < 8; i++){
+		err = pthread_join(findsdpid[i], (void**)&ret);
+		if(err!=0) printf("Bluetooth SDP Thread[%d] Return[%d][%d]\n",i,err,ret);
+	}
+}
+
+
 void* sdp_search_thread(void *arg){
 	int rst = -2;
 	pthread_t l2capid;
 	int ret = 0;
 	int err = 0;
 	int psm = 0;
+	
 	printf("SDP SEARCH thread\n");
-	sleep(1);
+	
+	//sleep(1);
+	psm = *(int *)arg;
 	while(1){
-		rst = sdp_search(&psm);
-		printf("SDP Search Result:%d\n", rst);
+		//rst = sdp_search(&psm);
+		//printf("SDP Search Result:%d\n", rst);
 		if(rst == 1) {
 			err = pthread_create(&l2capid, NULL ,l2cap_thread,(void *)&psm);
 			if(err!=0) printf("Create L2CAP Thread Error[%d]\n",err);
@@ -214,7 +249,7 @@ void* sdp_search_thread(void *arg){
 			if(err!=0) printf("Bluetooth L2CAP Thread Return[%d][%d]\n",err,ret);
 			break;
 		}
-		sleep(1);
+		//sleep(1);
 	}
 }
 
@@ -225,12 +260,13 @@ void* bluetooth_thread(void *arg){
 	int ret = 0;
 	int err = 0;
 
+/*
 	if(skmib._neighborAuth == 1){
 
 		err = pthread_create(&findsdpid, NULL ,sdp_search_thread,NULL);
 		if(err!=0) printf("Create Bluetooth SDP Thread Error[%d]\n",err);
 	}
-
+*/
 	err = pthread_create(&blueid, NULL ,bluetooth_accpet_thread,NULL);
 	if(err!=0) printf("Create Bluetooth Thread Error[%d]\n",err);
 
@@ -242,11 +278,11 @@ void* bluetooth_thread(void *arg){
 
 	err = pthread_join(blue_rxid, (void**)&ret);
 	if(err!=0) printf("Bluetooth RX Thread Return[%d][%d]\n",err,ret);
-
+/*
 	if(skmib._neighborAuth == 1){
 
 		err = pthread_join(findsdpid, (void**)&ret);
 		if(err!=0) printf("Bluetooth SDP Thread Return[%d][%d]\n",err,ret);
 	}
-
+*/
 }

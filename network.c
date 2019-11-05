@@ -2,6 +2,9 @@
 
 uint32_t service_uuid_int[] = { 0, 0, 0, 0xABCD };
 
+SKMIB_t skmib;
+CHECK_t auth[8];
+
 unsigned char* enc_auth_to_main(int* len){
 	unsigned char* data = NULL;
 
@@ -412,6 +415,9 @@ void parse_auth_dev(unsigned char* data){
 	int i = 0, j = 0;
 	int authNeighborLen = -1;
 	int* dev_num;
+	
+	int row = 0, col = 0;
+	char** result = NULL;
 
 	printf("Parse Auth Dev\n");
 /*
@@ -424,7 +430,32 @@ void parse_auth_dev(unsigned char* data){
 	}
 */
 
-	register_service();
+	result = select_neighborLista(&row, &col);
+
+	printf("NeighborLista Result Row:%d, Col:%d\n",row,col);
+
+	for(i = 0; i <= row; i++){
+
+		auth[i].devId = atoi(result[i*col]);
+		memcpy(auth[i].MAC, result[i*col +1], strlen(result[i*col +1]));
+
+		memcpy(auth[i].UUID, result[i*col +2], strlen(result[i*col +2]));
+		/*
+		printf("%s, %s, %s, %s, %s \n",
+				result[i*col],
+				result[i*col + 1],
+				result[i*col + 2],
+				result[i*col + 3],
+				result[i*col + 4]);
+				*/
+		printf("MAC[%d], uuid[%d]\n",strlen(result[i*col+1]), strlen(result[i*col+2]));
+	}
+
+	//SEARCH
+	
+	search_sdp_r();
+
+	//register_service();
 }
 
 void parse_role(unsigned char* data){
@@ -504,7 +535,6 @@ void parse_role(unsigned char* data){
 
 }
 
-SKMIB_t skmib;
 
 void* network_thread(void *arg){
 	pthread_t serverid;

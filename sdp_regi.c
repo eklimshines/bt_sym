@@ -31,7 +31,8 @@ sdp_session_t *register_service()
     printf("register sdp service\n");
 
     //_str2uuid("00001101-0000-1000-8000-00805F9B34FB",&svc_uuid);
-    _str2uuid(cfg.maindeviceuuid, &svc_uuid);
+    //_str2uuid(cfg.maindeviceuuid, &svc_uuid);
+    _str2uuid(cfg.myuuid, &svc_uuid);
     sdp_set_service_id(&record, svc_uuid);
 
     char str[256] = "";

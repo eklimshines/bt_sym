@@ -73,7 +73,7 @@ typedef struct _CHECK{
 	unsigned char CIPHER[260];
 	unsigned char UUID[40];
 	int socket;
-
+	int devId;
 }CHECK_t;
 
 int aes_encrypt(unsigned char* in, unsigned char* out, int size, unsigned char* key, int KEY_BIT);
@@ -121,6 +121,7 @@ void _sqlite3_close();
 unsigned char* select_neighborList(int *len);
 void select_param();
 int select_neighborByMAC(char* MAC);
+char** select_neighborLista(int* r, int* c);
 
 void _sk_setup();
 void _sk_close();
@@ -136,6 +137,8 @@ void parse_role(unsigned char* data);
 
 sdp_session_t *register_service();
 int sdp_search(int* psm);
+int _sdp_search(char* mac, char* uuid, int* psm);
+void search_sdp_r();
 
 int _str2uuid(const char* uuid_str, uuid_t* uuid);
 
@@ -163,6 +166,8 @@ void saveParamNeighbor(unsigned char* data, int len);
 
 void readParamCon();
 void saveParamCona(unsigned char* P1, int P1Len, unsigned char* P2, int P2Len, unsigned char* s, int sLen);
+
+
 extern pairing_t pairing;
 extern SKMIB_t skmib;
 
