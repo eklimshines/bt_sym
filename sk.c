@@ -50,7 +50,8 @@ void sendTaga(unsigned char* _tag, int tagLen){
 	
 	data[i++] = 0x03;
 
-	l2cap_send(data, dataLen);
+	//l2cap_send(data, dataLen);
+	blue_send(data, dataLen);
 }
 
 void sendTag(unsigned char* data){
