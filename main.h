@@ -127,7 +127,7 @@ char** select_neighborLista(int* r, int* c);
 void _sk_setup();
 void _sk_close();
 unsigned char* _sk_gen_key(unsigned char* ID);
-void checkTag(unsigned char* data, int len);
+void checkTag(unsigned char* data, int len, int index);
 void _sk_setup_load(int row, int col, char** result);
 void _sk_setup_param(unsigned char* _P1, unsigned char* _P2, unsigned char* _Ppub);
 

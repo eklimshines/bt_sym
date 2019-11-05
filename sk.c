@@ -7,13 +7,18 @@ CHECK_t auth[8];
 unsigned char* getPpub(int *len);
 
 
-void checkTag(unsigned char* data, int len){
+void checkTag(unsigned char* data, int len, int index){
 	int i = 0;
 	int tagLen = 0;
+	int tagDataLen = 0;
 	int myTagLen = 0;
+	int myMacLen = 0;
+	int result = -1;
 
 	unsigned char* _tag = NULL;
+	unsigned char* _tagData = NULL;
 	unsigned char* myTag = NULL;
+	unsigned char* myMac = NULL;
 
 	tagLen = data[i++];
 	_tag = (unsigned char*)malloc(tagLen);
@@ -23,7 +28,29 @@ void checkTag(unsigned char* data, int len){
 	printf("_tag[%d]: ", tagLen);
 	printf_byte(_tag, tagLen);
 
-	//myTag = HMAC_SHA512(auth[index].KEY, 128, data, &myTag);
+	myMac = get_bt_addr();
+	myMacLen = strlen(myMac);
+
+	tagDataLen = myMacLen + 260;	
+	_tagData = (unsigned char*)malloc(tagDataLen);
+
+	i = 0;
+	memcpy(&_tagData[i], myMac, myMacLen);
+	i += myMacLen;
+	memcpy(&_tagData[i], auth[index].CIPHER, 260);
+
+	myTag = HMAC_SHA512(auth[index].KEY, 128, _tagData, &myTagLen);
+
+	if(memcmp(_tag, myTag, myTagLen) != 0){
+		printf("Auth Failed\n");
+		result = 0;
+	}
+	else {
+		printf("Auth Success\n");
+		result = 1;
+	}
+	
+	enc_auth_result(result);
 
 	//myTag = HMAC_SHA512(_key, keyLen, data, &myTaglen);	
 }
@@ -63,6 +90,7 @@ void sendTag(unsigned char* data){
 	int keyLen = 0;
 	int pubLen = 0;
 	int myMacLen = 0;
+	int tagDataLen = 0;
 
 	unsigned char* _enc = NULL;
 	unsigned char* _param = NULL;
@@ -70,6 +98,7 @@ void sendTag(unsigned char* data){
 	unsigned char* _key = NULL;
 	unsigned char* _tag = NULL;
 	unsigned char* _dec = NULL;
+	unsigned char* _tagData = NULL;
 
 	unsigned char* myPub = NULL;
 	unsigned char* myMac = NULL;
@@ -119,7 +148,15 @@ void sendTag(unsigned char* data){
 
 	_key = _sk_kem_dec(_enc, &keyLen);
 
-	_tag = HMAC_SHA512(_key, keyLen, data, &len);
+	tagDataLen = myMacLen + encLen;	
+	_tagData = (unsigned char*)malloc(tagDataLen);
+
+	i = 0;
+	memcpy(&_tagData[i], myMac, myMacLen);
+	i += myMacLen;
+	memcpy(&_tagData[i], _enc, encLen);
+	
+	_tag = HMAC_SHA512(_key, keyLen, _tagData, &len);
 
 	printf("_tag[%d]: ", len);
 	printf_byte(_tag, len);

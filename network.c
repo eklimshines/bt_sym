@@ -35,7 +35,7 @@ unsigned char* enc_auth_to_main(int* len){
 
 	*len = dataLen + headerTailerLen;
 
-	printf_byte(data, dataLen + headerTailerLen);
+	//printf_byte(data, dataLen + headerTailerLen);
 
 	return data;
 }
@@ -549,7 +549,7 @@ void parse_role(unsigned char* data){
 		i++;
 		tagData = (unsigned char*) malloc(dataLen);
 		memcpy(tagData, &data[i], dataLen);
-		checkTag(tagData, dataLen);
+		checkTag(tagData, dataLen, 0);
 
 	}else if(data[i] == 0x08){
 		//Auth2
