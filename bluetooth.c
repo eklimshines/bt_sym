@@ -203,14 +203,18 @@ void search_sdp_r(){
 	int rst = 0;
 	int err = 0;
 	int ret = 0;
-
+	clock_t start, end;
 	pthread_t findsdpid[8];
 
 	for(i = 0; i < 8; i++){
 		psm = 0;
 		if(auth[i].devId != 0){
+			start = clock();
 			rst = _sdp_search(auth[i].MAC, auth[i].UUID, &psm);
+			end = clock();
 			printf("SDP[%d] Search Result:%d %d\n",i, rst,psm);
+
+			printf("The elapse time : %fs\n",(double) (end - start)/CLOCKS_PER_SEC);
 			if(rst == 1){
 				
 				auth[i].psm = psm;

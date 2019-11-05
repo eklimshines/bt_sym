@@ -35,6 +35,10 @@
 #define MAXCLIENTBUFSIZE 8192
 #define MAXNETBUFSIZE 8192*10
 
+#define eprintfExit(x, ...) { fprintf(stderr, __VA_ARGS__); exit(x); }
+#define eprintfReturn(x, ...) { fprintf(stderr, __VA_ARGS__); return (x); }
+
+
 typedef enum{
 	SESSION_CLOSE = 0,
 	SESSION_CONNECTED = 1
@@ -75,6 +79,7 @@ typedef struct _CHECK{
 	int socket;
 	int devId;
 	int psm;
+	int result;
 }CHECK_t;
 
 int aes_encrypt(unsigned char* in, unsigned char* out, int size, unsigned char* key, int KEY_BIT);

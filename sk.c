@@ -28,19 +28,19 @@ void checkTag(unsigned char* data, int len, int index){
 	printf("_tag[%d]: ", tagLen);
 	printf_byte(_tag, tagLen);
 
-	myMac = get_bt_addr();
-	myMacLen = strlen(myMac);
+	myMacLen = strlen(auth[index].MAC);
 
 	tagDataLen = myMacLen + 260;	
 	_tagData = (unsigned char*)malloc(tagDataLen);
 
 	i = 0;
-	memcpy(&_tagData[i], myMac, myMacLen);
+	memcpy(&_tagData[i], auth[index].MAC, myMacLen);
 	i += myMacLen;
 	memcpy(&_tagData[i], auth[index].CIPHER, 260);
 
-	myTag = HMAC_SHA512(auth[index].KEY, 128, _tagData, &myTagLen);
-
+	//myTag = HMAC_SHA512(auth[index].KEY, 128, _tagData, &myTagLen);
+	myTag = HMAC_SHA1(auth[index].KEY, _tagData, &len);
+	
 	if(memcmp(_tag, myTag, myTagLen) != 0){
 		printf("Auth Failed\n");
 		result = 0;
@@ -177,7 +177,9 @@ void sendEnc(char* ID, int index){
 	int paramLen = -1;
 	int macLen = strlen(ID);
 	int dataLen = -1;
+	clock_t start, end;
 
+	start = clock();
 	checkMac = select_neighborByMAC(ID);
 	
 	if(checkMac <= 0){
@@ -222,6 +224,9 @@ void sendEnc(char* ID, int index){
 	//blue_send(data, dataLen);
 
 	l2cap_send(data, dataLen);
+	end = clock();
+	printf("The elapse time : %fs\n", (double) (end - start)/CLOCKS_PER_SEC);
+
 }
 
 unsigned char* getPpub(int *len){

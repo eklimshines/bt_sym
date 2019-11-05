@@ -86,6 +86,7 @@ int server_open(void)
 	sock = socket(PF_INET,SOCK_STREAM,0);
 	if(sock>=0)
 	{
+		/*
 		setsockopt(sock,SOL_SOCKET,SO_SNDBUF,&size,sizeof(int));
 		setsockopt(sock,SOL_SOCKET,SO_RCVBUF,&size,sizeof(int));
 		memset(&tv,0,sizeof(tv));
@@ -96,7 +97,7 @@ int server_open(void)
 		setsockopt(sock,SOL_SOCKET,SO_SNDTIMEO,(char *)&tv,sizeof(tv));
 		setsockopt(sock,SOL_SOCKET,SO_REUSEADDR,(char*)&option,sizeof(option));//for bind -1 error
 		setsockopt(sock,SOL_SOCKET,SO_KEEPALIVE,(char*)&keepalive,sizeof(keepalive));//for bind -1 error
-
+*/
 		//port = SERVERPORT;
 
 		memset(&serv_addr,0,sizeof(serv_addr));
@@ -129,6 +130,7 @@ int server_tcpsend(uint8_t *data, int length)
 	if(conn>=0)
 	{
 		result = send(conn,data,length,MSG_NOSIGNAL);
+		printf("server send time :%d\n",clock());
 		if(result<0)
 		{
 			server_disconnect();
@@ -165,6 +167,7 @@ void* server_recvthread(void *arg){
 		{
 			len = recv(conn,buf,sizeof(buf),MSG_NOSIGNAL);
 			if(len>0){
+				printf("Server recv time: %d\n", clock());
 				parse_role(buf);
 			}
 		}

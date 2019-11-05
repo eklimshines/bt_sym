@@ -49,7 +49,7 @@ unsigned char* HMAC_SHA512(unsigned char *key, int keyLen,  unsigned char *data,
 unsigned char* HMAC_SHA1(unsigned char *key, unsigned char *data, unsigned int *len2){
 
 	unsigned char* digest;
-	char mdString[20];
+	unsigned char* mdString = (unsigned char*)malloc(40);
 	int i = 0;
 
 	digest = HMAC(EVP_sha1(), key, strlen(key), (unsigned char*)data, strlen(data), NULL, NULL);
@@ -59,5 +59,8 @@ unsigned char* HMAC_SHA1(unsigned char *key, unsigned char *data, unsigned int *
 
     	printf("HMAC digest: %s\n", mdString);
 
-	return digest;
+	*len2 = 40;
+
+	return mdString;
 }
+

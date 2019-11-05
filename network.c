@@ -551,9 +551,10 @@ void parse_role(unsigned char* data){
 		memcpy(tagData, &data[i], dataLen);
 		checkTag(tagData, dataLen, 0);
 
+		printf("Result Time: %d \n",clock());
 	}else if(data[i] == 0x08){
 		//Auth2
-		printf("Result Time: %f \n",clock());
+		printf("Result Time: %d \n",clock());
 	}
 
 	//free(neighbor);

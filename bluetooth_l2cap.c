@@ -82,7 +82,7 @@ int l2cap_connect(int psm){
     if( status < 0 ) perror("uh oh");
 
     sendEnc(auth[psm].MAC, psm);
-
+    printf("send Enc %d\n", clock());
     //close(s);
     //
     return s;
