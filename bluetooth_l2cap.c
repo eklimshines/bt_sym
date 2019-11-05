@@ -5,6 +5,7 @@ static CLTSESSION_t l2capsession = 0;
 
 CLTSESSION_t l2cap_setsession(CLTSESSION_t session);
 CLTSESSION_t l2cap_getsession(void);
+CHECK_t auth[8];
 
 void l2cap_setsock(int sock);
 int l2cap_getsock();
@@ -61,10 +62,14 @@ int l2cap_connect(int psm){
     // set the connection parameters (who to connect to)
     addr.l2_family = AF_BLUETOOTH;
     //addr.l2_psm = htobs(0x1001);
-    addr.l2_psm = htobs(psm);
-    str2ba( cfg.maindevicemac, &addr.l2_bdaddr );
+    //addr.l2_psm = htobs(psm);
+    //str2ba( cfg.maindevicemac, &addr.l2_bdaddr );
 
-    printf("L2CAP MAC:%s %d %d\n", cfg.maindevicemac, psm, addr.l2_psm);
+    addr.l2_psm = htobs(auth[psm].psm);
+    str2ba( auth[psm].MAC, &addr.l2_bdaddr );
+
+    //printf("L2CAP MAC:%s %d %d\n", cfg.maindevicemac, psm, addr.l2_psm);
+    printf("L2CAP MAC:%s %d %d\n", auth[psm].MAC, auth[psm].psm, addr.l2_psm);
     // connect to server
     status = connect(s, (struct sockaddr *)&addr, sizeof(addr));
 
@@ -75,6 +80,8 @@ int l2cap_connect(int psm){
     //}
 
     if( status < 0 ) perror("uh oh");
+
+    sendEnc(auth[psm].MAC, psm);
 
     //close(s);
     //

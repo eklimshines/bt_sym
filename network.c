@@ -70,6 +70,30 @@ unsigned char* enc_auth_to_main(int authNeighborLen, int* neighborNum){
 	return data;
 }
 */
+
+
+void enc_auth_result(int result){
+	unsigned char* data = NULL;
+
+	int i = 0;
+	int dataLen = 0;
+	int HTLen = 5;
+
+	dataLen = 1;
+	data = (unsigned char*)malloc(dataLen + HTLen);
+
+	data[i++] = 0x02;
+	data[i++] = dataLen >> 8;
+	data[i++] = dataLen >> 0;
+	data[i++] = 0x08;
+
+	data[i++] = result;
+
+	data[i++] = 0x03;
+
+        server_tcpsend(data, dataLen + HTLen);
+}
+
 void enc_setup_key_gen(int dev_num, unsigned char* mac){
 	unsigned char* data = NULL;
 	unsigned char* _Da = NULL;
@@ -434,12 +458,12 @@ void parse_auth_dev(unsigned char* data){
 
 	printf("NeighborLista Result Row:%d, Col:%d\n",row,col);
 
-	for(i = 0; i <= row; i++){
+	for(i = 1; i <= row; i++){
 
-		auth[i].devId = atoi(result[i*col]);
-		memcpy(auth[i].MAC, result[i*col +1], strlen(result[i*col +1]));
+		auth[i-1].devId = atoi(result[i*col]);
+		memcpy(auth[i-1].MAC, result[i*col +1], strlen(result[i*col +1]));
 
-		memcpy(auth[i].UUID, result[i*col +2], strlen(result[i*col +2]));
+		memcpy(auth[i-1].UUID, result[i*col +2], strlen(result[i*col +2]));
 		/*
 		printf("%s, %s, %s, %s, %s \n",
 				result[i*col],
@@ -529,6 +553,7 @@ void parse_role(unsigned char* data){
 
 	}else if(data[i] == 0x08){
 		//Auth2
+		printf("Result Time: %f \n",clock());
 	}
 
 	//free(neighbor);

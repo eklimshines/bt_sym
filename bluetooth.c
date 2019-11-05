@@ -173,7 +173,7 @@ void* bluetooth_accpet_thread(void *arg){
 				blue_setconn(client);
 				
 				//Gen Enc
-				sendEnc(ID);
+				//sendEnc(ID);
 			}
 	    		
 		}
@@ -210,10 +210,10 @@ void search_sdp_r(){
 		psm = 0;
 		if(auth[i].devId != 0){
 			rst = _sdp_search(auth[i].MAC, auth[i].UUID, &psm);
-
-			printf("SDP[%d] Search Result:%d\n",i, rst);
+			printf("SDP[%d] Search Result:%d %d\n",i, rst,psm);
 			if(rst == 1){
 				
+				auth[i].psm = psm;
 				err = pthread_create(&findsdpid[i], NULL ,sdp_search_thread,(void *)&i);
 				if(err!=0) printf("Create Bluetooth SDP Thread[%d] Error[%d]\n",i, err);
 			}
@@ -238,19 +238,17 @@ void* sdp_search_thread(void *arg){
 	
 	//sleep(1);
 	psm = *(int *)arg;
-	while(1){
+	//while(1){
 		//rst = sdp_search(&psm);
 		//printf("SDP Search Result:%d\n", rst);
-		if(rst == 1) {
-			err = pthread_create(&l2capid, NULL ,l2cap_thread,(void *)&psm);
-			if(err!=0) printf("Create L2CAP Thread Error[%d]\n",err);
+		err = pthread_create(&l2capid, NULL ,l2cap_thread,(void *)&psm);
+		if(err!=0) printf("Create L2CAP Thread Error[%d]\n",err);
 			
-			err = pthread_join(l2capid, (void**)&ret);
-			if(err!=0) printf("Bluetooth L2CAP Thread Return[%d][%d]\n",err,ret);
-			break;
-		}
+		err = pthread_join(l2capid, (void**)&ret);
+		if(err!=0) printf("Bluetooth L2CAP Thread Return[%d][%d]\n",err,ret);
+	//		break;
 		//sleep(1);
-	}
+	//}
 }
 
 void* bluetooth_thread(void *arg){

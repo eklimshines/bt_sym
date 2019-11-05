@@ -2,6 +2,7 @@
 
 static element_t Ppub,P1,P2,s,g,Da;
 pairing_t pairing;
+CHECK_t auth[8];
 
 unsigned char* getPpub(int *len);
 
@@ -21,6 +22,8 @@ void checkTag(unsigned char* data, int len){
 
 	printf("_tag[%d]: ", tagLen);
 	printf_byte(_tag, tagLen);
+
+	//myTag = HMAC_SHA512(auth[index].KEY, 128, data, &myTag);
 
 	//myTag = HMAC_SHA512(_key, keyLen, data, &myTaglen);	
 }
@@ -125,7 +128,7 @@ void sendTag(unsigned char* data){
 	//_tag = HMAC_SHA1(_key, data, &len);
 }
 
-void sendEnc(char* ID){
+void sendEnc(char* ID, int index){
 	unsigned char* _enc = NULL;
 	unsigned char* _param = NULL;
 	unsigned char* data = NULL;
@@ -146,7 +149,9 @@ void sendEnc(char* ID){
 
 	//_param = getPublicParam(&paramLen);
 	_param = getPpub(&paramLen);
-	_enc = _sk_kem_enc(ID, &encLen);
+	_enc = _sk_kem_enc(ID, &encLen, index);
+
+	memcpy(auth[index].CIPHER, _enc, encLen);
 
 	dataLen = 10 + encLen + macLen + paramLen;
 	data = (unsigned char*) malloc(dataLen);
@@ -176,8 +181,9 @@ void sendEnc(char* ID){
 
 	data[i++] = 0x03;
 
-	blue_send(data, dataLen);
+	//blue_send(data, dataLen);
 
+	l2cap_send(data, dataLen);
 }
 
 unsigned char* getPpub(int *len){
@@ -553,7 +559,7 @@ void setPublicParamNeighbor(unsigned char* data, int len){
 
 }
 
-unsigned char* _sk_kem_enc(unsigned char* _ID, int* len){
+unsigned char* _sk_kem_enc(unsigned char* _ID, int* len, int index){
 	int keylength = 128;
 	int uLen, vLen, dataLen, grLen, mLen;
 	unsigned char* data = NULL;
@@ -595,6 +601,7 @@ unsigned char* _sk_kem_enc(unsigned char* _ID, int* len){
 
 	element_from_bytes(m, aes_key);
 	
+	memcpy(auth[index].KEY, aes_key, keylength);
 	//r <- H3(m)
 
 	element_printf("m = %B\n",m);

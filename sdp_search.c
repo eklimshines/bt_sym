@@ -14,7 +14,7 @@ int _sdp_search(char* mac, char* uuid, int* psm){
     printf("search SDP protocol\n");
 
     //str2ba( "B8:27:EB:BB:62:35", &target );
-    str2ba( cfg.maindevicemac, &target);
+    str2ba( mac, &target);
 
     // connect to the SDP server running on the remote machine
     session = sdp_connect( BDADDR_ANY, &target, SDP_RETRY_IF_BUSY );
@@ -26,7 +26,7 @@ int _sdp_search(char* mac, char* uuid, int* psm){
     // specify the UUID of the application we're searching for
     
     //_str2uuid("00001101-0000-1000-8000-00805F9B34FB",&svc_uuid);
-    _str2uuid(cfg.maindeviceuuid, &svc_uuid);
+    _str2uuid(uuid, &svc_uuid);
 
     //sdp_uuid128_create( &svc_uuid, &svc_uuid_int );
     search_list = sdp_list_append( NULL, &svc_uuid );

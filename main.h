@@ -17,7 +17,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <fcntl.h>
-
+#include <time.h>
 #include <arpa/inet.h>
 #include <openssl/hmac.h>
 #include <sqlite3.h>
@@ -74,6 +74,7 @@ typedef struct _CHECK{
 	unsigned char UUID[40];
 	int socket;
 	int devId;
+	int psm;
 }CHECK_t;
 
 int aes_encrypt(unsigned char* in, unsigned char* out, int size, unsigned char* key, int KEY_BIT);
@@ -151,8 +152,8 @@ void setPublicParamController(unsigned char* data, int len);
 unsigned char* HMAC_SHA512(unsigned char *key, int keyLen, unsigned char *data, unsigned int *len2);
 
 void sendTag(unsigned char* data);
-void sendEnc(char* ID);
-unsigned char* _sk_kem_enc(unsigned char *ID, int* len);
+void sendEnc(char* ID, int index);
+unsigned char* _sk_kem_enc(unsigned char *ID, int* len, int index);
 unsigned char* _sk_kem_dec(unsigned char* _enc, int* keyLen);
 
 void* l2cap_thread(void *arg);
