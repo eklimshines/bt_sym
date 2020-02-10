@@ -1,6 +1,5 @@
 #include "main.h"
 
-pairing_t pairing;
 SKMIB_t skmib;
 CONFIG_t cfg;
 CHECK_t auth[8];
@@ -34,48 +33,16 @@ void arg_parser(int argc, char **argv){
 
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv){
     pthread_t bluetoothid;
     pthread_t networkid;
     int ret = 0;
     int err = 0;
     int len = 0;
-    //insert_neighbor(6, get_bt_addr(), get_bt_uuid(), get_bt_name());
-
-    //select_neighborList();
-
-    //printf("%s , %s, %s\n",get_bt_addr(), get_bt_name(), get_bt_uuid());
-
-    //printf("%d \n",argc);
 
     arg_parser(argc, argv);
 
     config_init(&cfg);
-
-    //Set the paring parameters
-    pbc_demo_pairing_init(pairing, argc, argv);
- 
-    //readParamNeighbor();
-
-    init_sqlite3();
-    //init_sqlite3_param();
-
-    if(skmib._userSetup == 1) _sk_setup();
-    if(skmib._userAuth == 1) readParamCon(); //select_param(); //_sk_setup_load();
-    if(skmib._neighborAuth == 1) readParamNeighbor();
-
-    
-    if(skmib._neighborAuth == 1 || skmib._neighbor == 1) register_service();
-    //_sk_setup_key(_sk_gen_key(cfg.maindevicemac));
-
-    //_sk_kem_dec(_sk_kem_enc(cfg.maindevicemac, &len));
-
-
-    //printf("After param len:%d\n",len);
-
-    //select_neighborList();
-    //sdp_search();
 
     err = pthread_create(&networkid, NULL, network_thread, NULL);
     if(err!=0) printf("Create Network Thread Error[%d]\n",err);
@@ -92,6 +59,4 @@ int main(int argc, char **argv)
     	err = pthread_join(bluetoothid,(void**)&ret);
     	if(err!=0) printf("Bluetooth Thread Return[%d][%d]\n",err,ret);
     }
-    _sqlite3_close();
-
 }

@@ -21,18 +21,16 @@ LIBS += -lsqlite3 -ldl
 SRC	=	main.c\
 		util.c\
 		aes.c\
-		sk.c\
-		sk_util.c\
-		sk_kem.c\
-		sk_kem_aes.c\
 		network.c\
 		network_server.c\
 		network_client.c\
+		network_packet.c\
+		network_parse.c\
 		bluetooth.c\
 		bluetooth_l2cap.c\
 		neighbor_db.c\
-		sdp_regi.c\
-		sdp_search.c\
+		sdp.c\
+		sym.c\
 
 TARGET = blue_test
 
