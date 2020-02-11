@@ -173,6 +173,7 @@ void config_init(CONFIG_t *config){
 	char* struserip = "USERIP";
 	char* struserport = "USERPORT";
 	char* strmyuuid = "MYUUID";
+	char* strdev = "DEVNUM";
 	int length = 0;
 	int i = 0;
 
@@ -184,6 +185,7 @@ void config_init(CONFIG_t *config){
 
 	int maindeviceport;
 	int userport;
+	int devnum;
 
 	memset(config,0,sizeof(CONFIG_t));
 
@@ -229,6 +231,9 @@ void config_init(CONFIG_t *config){
 	length = readconfig(buf, rcnt, struserport, sbuf);
 	config->userport = strtoul(sbuf, 0, 10);
 	
+	memset(sbuf, 0, sizeof(sbuf));
+	length = readconfig(buf, rcnt, strdev, sbuf);
+	config->devNum = strtoul(sbuf, 0, 10);
 
 	printf("MainDevice IP = %s\n",config->maindeviceip);
 	printf("MainDevice MAC = %s\n",config->maindevicemac);
@@ -236,6 +241,7 @@ void config_init(CONFIG_t *config){
 	printf("MainDevice PORT = %d\n",config->maindeviceport);
 	printf("USER IP = %s\n",config->userip);
 	printf("USER PORT = %d\n",config->userport);
+	printf("DEVNUM = %d\n",config->devNum);
 	printf("My UUID = %s\n", config->myuuid);
 
 	memset(sbuf,0,sizeof(sbuf));

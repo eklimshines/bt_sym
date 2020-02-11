@@ -1,5 +1,6 @@
 #include "main.h"
 
+CONFIG_t cfg;
 CHECK_t auth[8];
 AUTH_t auth2;
 extern int nCount;
@@ -81,7 +82,7 @@ void sendnRegPacket(){
 	data[i++] = dataLen >> 8;
 	data[i++] = dataLen >> 0;
 	data[i++] = 0x04;
-	data[i++] = DEV_ID; //0x05; //Rasp-5
+	data[i++] = cfg.devNum; //0x05; //Rasp-5
 	data[i++] = macLen;
 	//MAC
 	memcpy(&data[i], mac, macLen);
