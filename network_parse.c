@@ -10,6 +10,7 @@ void parse_neighborList(unsigned char* data){
 	int macLen = 0;
 	int uuidLen = 0;
 	int keyLen = 0;
+	int nCount = 0;
 
 	unsigned char* _mac = NULL;
 	unsigned char* _uuid = NULL;
@@ -31,14 +32,15 @@ void parse_neighborList(unsigned char* data){
 		printf("dev_num:%d \n",dev_num);
 		auth[j].devId = dev_num;
 
-		macLen = data[i++];
+		macLen = data[i++] << 8;
+		macLen |= data[i++] << 0;
 		printf("macLen:%d \n",macLen);
 		_mac = (unsigned char*)malloc(macLen);
 		memset(_mac, 0, macLen);
 		memcpy(_mac, &data[i], macLen);
 		memcpy(auth[j].MAC, _mac, macLen);
 		i += macLen;
-	
+/*	
 		uuidLen = data[i++];
 		printf("uuidLen:%d \n",uuidLen);
 		_uuid = (unsigned char*) malloc (uuidLen);
@@ -46,16 +48,20 @@ void parse_neighborList(unsigned char* data){
 		memcpy(_uuid, &data[i], uuidLen);
 		memcpy(auth[j].UUID, _uuid, uuidLen);
 		i+= uuidLen;
-
-		keyLen = data[i++];
+*/
+		keyLen = data[i++] << 8;;
+		keyLen |= data[i++] << 0;
 		printf("keyLen:%d \n",keyLen);
 		_key = (unsigned char*) malloc (keyLen);
 		memset(_key, 0, keyLen);
 		memcpy(_key, &data[i], keyLen);
 		memcpy(auth[j].nKEY, _key, keyLen);
 		i+= keyLen;
+
+		nCount = data[i++];
 		
-		printf("Neighbor Dev:%02d mac[%d]:%s uuid[%d]:%s Key[%d]\n", dev_num, macLen,_mac, uuidLen,_uuid, keyLen);
+		printf("(%d)n[%02d] mac[%d]:%s key[%d]\n",nCount, dev_num, macLen,_mac, keyLen);
+		//printf("Neighbor Dev:%02d mac[%d]:%s uuid[%d]:%s Key[%d]\n", dev_num, macLen,_mac, uuidLen,_uuid, keyLen);
 		
 	}
 	
@@ -132,7 +138,7 @@ void parse_role(unsigned char* data){
 	unsigned char* tagData = NULL;
 
 	printf("Parse MD Role Init \n");
-
+	
 	if(data[i++] != 0x02) printf("Parse MD Header Error!!!\n");
 	dataLen = data[i++] << 8;
 	dataLen |= data[i++] << 0;
@@ -140,17 +146,19 @@ void parse_role(unsigned char* data){
 	if(dataLen < 0) printf("Parse MD DataLen Error!!!\n");
 	if(data[i] == 0x02){
 		//Setup
+		printf("Parse nListPacket\n");
 		i++;
 
-		neighborList = (unsigned char*)malloc(dataLen +1);
-		memcpy(neighborList, &data[i], dataLen +1);
+		neighborList = (unsigned char*)malloc(dataLen);
+		memcpy(neighborList, &data[i], dataLen);
 
-		//parse_neighborList(neighborList);
+		parse_neighborList(neighborList);
 
 		//printf_byte(neighborList, dataLen + 1);
 
 	}else if(data[i] == 0x03){
 		//Authenticate
+		printf("Parse authenticationPacket\n");
 		i++;
 
 		auth = (unsigned char*)malloc(dataLen);
@@ -160,6 +168,7 @@ void parse_role(unsigned char* data){
 
 	}else if(data[i] == 0x04){
 		//neighbor Reigster
+		printf("Parse nRegPacket\n");
 		i++;
 		neighbor = (unsigned char*)malloc(dataLen);
 		memcpy(neighbor, &data[i], dataLen);
@@ -167,6 +176,7 @@ void parse_role(unsigned char* data){
 		parse_neighborRegister(neighbor);
 	}else if(data[i] == 0x05){
 		//Key
+		printf("Parse keyPacket\n");
 		i++;
 		keyData = (unsigned char*)malloc(dataLen);
 		memcpy(keyData, &data[i], dataLen);
@@ -174,6 +184,7 @@ void parse_role(unsigned char* data){
 		parse_recvKey(keyData, dataLen);
 	}else if(data[i] == 0x06){
 		//encryption
+		printf("Parse encPacket\n");
 		i++;
 		encData = (unsigned char*) malloc(dataLen);
 		memcpy(encData, &data[i], dataLen);
@@ -182,6 +193,7 @@ void parse_role(unsigned char* data){
 
 	}else if(data[i] == 0x07){
 		//tag
+		printf("Parse tagPacket\n");
 		i++;
 		tagData = (unsigned char*) malloc(dataLen);
 		memcpy(tagData, &data[i], dataLen);

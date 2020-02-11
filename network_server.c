@@ -171,7 +171,8 @@ void* server_recvthread(void *arg){
 		{
 			len = recv(conn,buf,sizeof(buf),MSG_NOSIGNAL);
 			if(len>0){
-				printf("Server recv time: %d\n", clock());
+				printf("[%d]Server recv time: %d\n",len, clock());
+				printf_byte(buf, len);
 				parse_role(buf);
 			}
 		}
