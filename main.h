@@ -131,6 +131,7 @@ void parse_role(unsigned char* data);
 void parse_role_socket(unsigned char* data, int socket);
 
 //network_packet.c
+void sendnListPacket();
 void sendnRegPacket();
 void sendKeyPacket(unsigned char* _key, int keyLen);
 void sendTag(unsigned char* data);

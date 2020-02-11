@@ -47,7 +47,7 @@ int main(int argc, char **argv){
 
     nCount = 0;
 
-    if(skmib._userAuth == 1) readNeighborList(&len);
+    //if(skmib._userAuth == 1) readNeighborList(&len);
     if(skmib._neighborAuth == 1) readSymKey();
 
     err = pthread_create(&networkid, NULL, network_thread, NULL);

@@ -2,25 +2,25 @@
 
 CHECK_t auth[8];
 AUTH_t auth2;
+extern int nCount;
 
-void sendnListPacket(int row, int col, char** result, int *len){
+void sendnListPacket(){
 	unsigned char* data = NULL;
+	unsigned char* _nData = NULL;
+
 	int i = 0, j = 0;
 	int macLen = 0;
 	int uuidLen = 0;
 	int keyLen = 0;
 	int dataLen = 0;
-	int htLen = 6;
+	int htLen = 5;
+	int nDataLen = 0;
 
-	printf("sendnListPacket(Con->Main)\n");
+	printf("sendnListPacket(Con->Main)[%d]\n",nCount);
 
-	for(j = 1; j <= row; j++){
-		macLen = strlen(result[j * col + 1]);
-		uuidLen = strlen(result[j * col + 2]);
-		keyLen = strlen(result[j * col + 3]);
-	}
+	_nData = readNeighborList(&nDataLen);
 
-	dataLen = row * (macLen + uuidLen + keyLen + 4);
+	dataLen = nDataLen + 1;
 	data = (unsigned char *)malloc(dataLen + htLen);
 	
 	data[i++] = 0x02;
@@ -28,34 +28,16 @@ void sendnListPacket(int row, int col, char** result, int *len){
 	data[i++] = dataLen >> 0;
 	data[i++] = 0x02;
 
-	data[i++] = row;
+	data[i++] = nCount;
 
-	for(j = 1; j <= row; j++){
-		data[i++] = atoi(result[j*col]); //dev_num
-
-		//mac
-		macLen = strlen(result[j * col + 1]);
-		data[i++] = macLen;
-		memcpy(&data[i], result[j*col + 1], macLen);
-		i += macLen;
-
-		//uuid
-		uuidLen = strlen(result[j * col + 2]);
-		data[i++] = uuidLen;
-		memcpy(&data[i], result[j*col + 2], uuidLen);
-		i += uuidLen;
-
-		//Da
-		keyLen = strlen(result[j * col + 3]);
-		data[i++] = keyLen;
-		memcpy(&data[i], result[j*col + 3], keyLen);
-		i += keyLen;
-	}
+	memcpy(&data[i], _nData, nDataLen);
+	i += nDataLen;
 
 	data[i++] = 0x03;
 	data[i] = '\0';
 	
-        server_tcpsend(data, dataLen + htLen);
+	printf_byte(data, dataLen + htLen);
+        client_send(data, dataLen + htLen);
 
 }
 

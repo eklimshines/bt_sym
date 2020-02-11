@@ -8,7 +8,7 @@ unsigned char* readNeighborList(int *len){
 	int ch;
 	int i =0;
 	unsigned char read[2048]= {0};
-
+	unsigned char* data = NULL;
 	printf("ReadNeighborList\n");
 
 	// test.bin 이라는 이진파일을 읽기 전용으로 열기
@@ -26,11 +26,17 @@ unsigned char* readNeighborList(int *len){
 	fclose(fp);
 
 	printf("last:%02x, %02x\n", ch, read[i-1]);
+	nCount = read[i-1];
 
-	printf_byte(read, i);
+	printf("nCount:%d, i:%d\n",nCount, i);
+
+	data = (unsigned char*)malloc(i);
+	memcpy(data, read, i);
+
+	//printf_byte(read, i);
 	*len = i;
-
-	return read;
+	
+	return data;
 }
 
 void saveNeighborList(unsigned char* _key, int keyLen, unsigned char* _mac, int macLen, int devNum){
