@@ -150,7 +150,8 @@ void* l2cap_session_thread(void *arg){
 	while(1){
 		//for(i = 0; i < 8; i++){
 		session = l2cap_getsession();
-			if(auth[i].devId !=0){
+			//if(auth[i].devId !=0)
+			{
 				//session = auth[i].session;
 				switch(session){
 					case SESSION_CLOSE:
@@ -194,4 +195,3 @@ void* l2cap_thread(void *arg){
 	l2cap_close();
 
 }
-

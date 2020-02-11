@@ -53,7 +53,8 @@ int main(int argc, char **argv){
     err = pthread_create(&networkid, NULL, network_thread, NULL);
     if(err!=0) printf("Create Network Thread Error[%d]\n",err);
     
-    if(skmib._neighborAuth == 1 || skmib._neighbor == 1){
+    //if(skmib._neighborAuth == 1 || skmib._neighbor == 1)
+    {
     	err = pthread_create(&bluetoothid, NULL, bluetooth_thread, NULL);
     	if(err!=0) printf("Create Bluetooth Thread Error[%d]\n",err);
     }
@@ -61,7 +62,8 @@ int main(int argc, char **argv){
     err = pthread_join(networkid,(void**)&ret);
     if(err!=0) printf("Network Thread Return[%d][%d]\n",err,ret);
     
-    if(skmib._neighborAuth == 1 || skmib._neighbor == 1){
+    //if(skmib._neighborAuth == 1 || skmib._neighbor == 1)
+    {
     	err = pthread_join(bluetoothid,(void**)&ret);
     	if(err!=0) printf("Bluetooth Thread Return[%d][%d]\n",err,ret);
     }
