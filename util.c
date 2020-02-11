@@ -1,6 +1,7 @@
 #include "main.h"
 
 CONFIG_t cfg;
+
 char* get_bt_uuid(){
 
 	printf("Get BT UUID[%d]: %s\n",strlen(cfg.myuuid), cfg.myuuid);

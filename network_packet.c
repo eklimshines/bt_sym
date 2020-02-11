@@ -125,26 +125,25 @@ void sendKeyPacket(unsigned char* _key, int keyLen){
         server_tcpsend(data, keyLen + htLen);
 }
 
-void sendEncPakcet(char* ID, int index){
+void sendEncPacket(unsigned char* ID, int index){
 	unsigned char* _enc = NULL;
 	unsigned char* data = NULL;
-	
+	unsigned char* _key = NULL;
 	int i = 0;
-	int checkMac = -1;
-	int encLen = -1;
+	
+	int encLen = 128;
+	int keyLen = 128;
 	int macLen = strlen(ID);
 	int dataLen = -1;
 	clock_t start, end;
 
 	start = clock();
-	//checkMac = select_neighborByMAC(ID);
-	
-	if(checkMac <= 0){
-		printf("No MAC \n");
-		//return NULL;
-	}else printf("MainDevice Send Enc Func\n");
 
-	//_enc = _sk_kem_enc(ID, &encLen, index);
+	_key = genSymKey(keyLen);
+	memcpy(auth[index].KEY, _key, keyLen);
+
+	aes_encrypt(auth[index].KEY, _enc, encLen, auth[index].nKEY, keyLen);
+
 
 	memcpy(auth[index].CIPHER, _enc, encLen);
 

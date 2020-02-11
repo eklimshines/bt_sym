@@ -142,7 +142,7 @@ void* bluetooth_accpet_thread(void *arg){
 					if(strcmp(ID, auth[i].MAC)==0){
 						printf("ID:%s, MAC:%s\n",ID, auth[i].MAC);
 						auth[i].socket = client;
-						//sendEnc(ID, i);
+						sendEncPacket(ID, i);
 						break;
 					}
 				}

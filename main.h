@@ -134,8 +134,8 @@ void parse_role_socket(unsigned char* data, int socket);
 void sendnListPacket();
 void sendnRegPacket();
 void sendKeyPacket(unsigned char* _key, int keyLen);
-void sendTag(unsigned char* data);
-void sendEnc(char* ID, int index);
+void sendEncPacket(unsigned char* ID, int index);
+void sendTagPacket(unsigned char* _tag, int tagLen);
 void sendAuthReqPacket();
 
 //save.c
