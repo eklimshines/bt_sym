@@ -120,7 +120,7 @@ int client_connect(void){
 	}else if(skmib._userAuth == 1){
 		sendnListPacket();
 	}else if(skmib._userAuthReq == 1){
-		//data = enc_auth_to_main(&len);
+		sendAuthReqPacket();
 		printf("Auth Req :%lf\n",clock());
 	}
 	//if(len > 0) client_send(data, len);

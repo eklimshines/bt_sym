@@ -36,7 +36,7 @@ void sendnListPacket(){
 	data[i++] = 0x03;
 	data[i] = '\0';
 	
-	printf_byte(data, dataLen + htLen);
+	//printf_byte(data, dataLen + htLen);
         client_send(data, dataLen + htLen);
 
 }
@@ -45,7 +45,7 @@ void sendAuthReqPacket(){
 	unsigned char* data = NULL;
 
 	int i = 0, j = 0;
-	int dataLen = 0;
+	int dataLen = 1;
 	int htLen = 5;
 
 	printf("sendAuthReqPacket(Con->Main)\n");
@@ -56,11 +56,11 @@ void sendAuthReqPacket(){
 	data[i++] = dataLen >> 8;
 	data[i++] = dataLen >> 0;
 	data[i++] = 0x03;
-
+	data[i++] = 0x00;
 	data[i++] = 0x03;
 	data[i] = '\0';
 
-        server_tcpsend(data, dataLen + htLen);
+        client_send(data, dataLen + htLen);
 }
 
 void sendnRegPacket(){
