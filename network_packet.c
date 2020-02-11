@@ -119,12 +119,12 @@ void sendnRegPacket(){
 
 void sendKeyPacket(unsigned char* _key, int keyLen){
 	unsigned char* data = NULL;
-	int i = 0, j = 0;
 	int htLen = 5;
+	int i = 0;
 
-	printf("sendKeyPacket(Con->Neighbor)\n");
+	printf("sendKeyPacket(Con->Neighbor)[%d]\n",keyLen);
 
-	_key = genSymKey(128, &keyLen);
+	//_key = genSymKey(128, &keyLen);
 	data = (unsigned char *)malloc(keyLen + htLen);
 
 	data[i++] = 0x02;
@@ -136,6 +136,8 @@ void sendKeyPacket(unsigned char* _key, int keyLen){
 	i+= keyLen;
 	data[i++] = 0x03;
 	data[i] = '\0';
+	
+	//printf_byte(data, keyLen + htLen);
 
         server_tcpsend(data, keyLen + htLen);
 }
@@ -152,7 +154,7 @@ void sendEncPakcet(char* ID, int index){
 	clock_t start, end;
 
 	start = clock();
-	checkMac = select_neighborByMAC(ID);
+	//checkMac = select_neighborByMAC(ID);
 	
 	if(checkMac <= 0){
 		printf("No MAC \n");

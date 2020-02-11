@@ -3,6 +3,7 @@
 SKMIB_t skmib;
 CONFIG_t cfg;
 CHECK_t auth[8];
+int nCount;
 
 void arg_parser(int argc, char **argv){
 	int i = 0;
@@ -43,6 +44,10 @@ int main(int argc, char **argv){
     arg_parser(argc, argv);
 
     config_init(&cfg);
+
+    nCount = 0;
+
+    if(skmib._userAuth == 1) readNeighborList(&len);
 
     err = pthread_create(&networkid, NULL, network_thread, NULL);
     if(err!=0) printf("Create Network Thread Error[%d]\n",err);

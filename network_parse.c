@@ -1,5 +1,7 @@
 #include "main.h"
 
+int nCount;
+
 void parse_neighborList(unsigned char* data){
 	int i = 0, j = 0;
 	int neighborLen = -1;
@@ -67,17 +69,17 @@ void parse_authentication(unsigned char* data){
 
 void parse_neighborRegister(unsigned char* data){
 	int i = 0;
-	int dev_num = -1;
+	int devNum = -1;
 	int macLen = -1;
 	int uuidLen = -1;
-	int keyLen = -1;
+	int keyLen = 128;
 
-	unsigned char* _mac;
-	unsigned char* _uuid;
-	unsigned char* _key;
+	unsigned char* _mac = NULL;
+	unsigned char* _uuid = NULL;
+	unsigned char* _key = NULL;
 
 	printf("Parse neighborRegister: ");
-	dev_num = data[i++];
+	devNum = data[i++];
 
 	macLen = data[i++];
 	_mac = (char *)malloc(macLen);
@@ -89,9 +91,13 @@ void parse_neighborRegister(unsigned char* data){
 	memcpy(_uuid, &data[i], uuidLen);
 	i += uuidLen;
 
-	printf("[%02d] mac[%d]: %s\n", dev_num, macLen, _mac);
+	printf("[%02d] mac[%d]:%s, uuid[%d]:%s\n", devNum, macLen, _mac, uuidLen, _uuid);
 	
-	_key = genSymKey(128, &keyLen);
+	_key = genSymKey(keyLen);
+	nCount++;
+	saveNeighborList(_key, keyLen, _mac, macLen, devNum);
+
+	sendKeyPacket(_key, keyLen);
 
 }
 
@@ -108,7 +114,9 @@ void parse_recvKey(unsigned char* data){
 	memcpy(_key, &data[i], keyLen);
 	i += keyLen;
 
-	printf("key[%d]: %s\n",keyLen,  mac);
+	printf("key[%d]: %s\n",keyLen, _key);
+
+	saveSymKey(_key, keyLen);
 }
 
 
@@ -209,7 +217,7 @@ void parse_role_socket(unsigned char* data, int socket){
 		i++;
 		tagData = (unsigned char*) malloc(dataLen);
 		memcpy(tagData, &data[i], dataLen);
-		checkTag(tagData, dataLen, socket);
+		//checkTag(tagData, dataLen, socket);
 
 		printf("Result Time: %d \n",clock());
 	}

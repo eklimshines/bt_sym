@@ -4,7 +4,7 @@ CURDIR = $(shell pwd)
 LIBDIR = $(CURDIR)/lib
 
 CFLAGS = -I$(CURDIR)
-CFLAGS += -I/usr/local/include/pbc
+#CFLAGS += -I/usr/local/include/pbc
 CFLAGS += -I/usr/local/ssl/include
 #CFLAGS += -I$(CURDIR)/asn/rtbersrc
 #CFLAGS += -w -Wunused
@@ -12,11 +12,11 @@ CFLAGS += -I/usr/local/ssl/include
 
 LIBS = -L/usr/local/lib
 LIBS += -L/usr/local/ssl/lib -Wl,-rpath /usr/local/lib
-LIBS += -lpbc -lgmp
+#LIBS += -lpbc -lgmp
 LIBS += -lssl -lcrypto
 LIBS += -lbluetooth
 LIBS += -lpthread
-LIBS += -lsqlite3 -ldl
+#LIBS += -lsqlite3 -ldl
 
 SRC	=	main.c\
 		util.c\
@@ -28,9 +28,9 @@ SRC	=	main.c\
 		network_parse.c\
 		bluetooth.c\
 		bluetooth_l2cap.c\
-		neighbor_db.c\
 		sdp.c\
 		sym.c\
+		save.c\
 
 TARGET = blue_test
 

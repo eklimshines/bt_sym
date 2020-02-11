@@ -142,7 +142,7 @@ void* bluetooth_accpet_thread(void *arg){
 					if(strcmp(ID, auth[i].MAC)==0){
 						printf("ID:%s, MAC:%s\n",ID, auth[i].MAC);
 						auth[i].socket = client;
-						sendEnc(ID, i);
+						//sendEnc(ID, i);
 						break;
 					}
 				}
@@ -179,50 +179,6 @@ void blue_send(unsigned char* data, int len){
 		status = write(sock, data, len);
 		if(status < 0) printf("Blue Server L2CAP Send[%d] Failed %d\n", len, status);
 		else printf("Blue Server  Send Success\n");
-	}
-}
-
-pthread_mutex_t mutex_lock;
-
-void search_sdp_r(){
-	int i = 0;
-	int psm = 0;
-	int rst = 0;
-	int err = 0;
-	int ret = 0;
-	int j =0;
-	clock_t start, end;
-	pthread_t findsdpid[8];
-	pthread_t sdpid[8];
-	pthread_t l2capid[8];
-
-	start = clock();
-	
-	for(i = 0; i < 8; i++){
-		psm = 0;
-		if(auth[i].devId != 0){
-			
-			printf("__[%d]SDP Search[%s]:%s\n",i,auth[i].MAC, auth[i].UUID);
-			rst = _sdp_search(auth[i].MAC, auth[i].UUID, &auth[i].psm);
-			//auth[i].psm = 4097;
-			auth[i].session = SESSION_CLOSE;
-			printf("[%d]SDP[%d] Search Result:%d %d\n",auth[i].devId,i, rst,auth[i].psm);
-
-
-			err = pthread_create(&l2capid[i], NULL ,l2cap_thread,(void *)&i);
-			//usleep(250);
-		}
-
-		//pthread_mutex_unlock(&mutex_lock);
-	}
-	end = clock();
-	printf("The search_sdp_r func elapse time : %fs\n",(double) (end - start)/CLOCKS_PER_SEC);
-	
-	for (i = 0; i < 8; i++){
-		if(auth[i].devId !=0 && auth[i].psm > 0){
-	err = pthread_join(l2capid[i], (void**)&ret);
-	if(err!=0) printf("Bluetooth L2CAP Thread Return[%d][%d]\n",err,ret);
-		}
 	}
 }
 

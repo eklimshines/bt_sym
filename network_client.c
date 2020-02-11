@@ -116,12 +116,12 @@ int client_connect(void){
 	sleep(2);
 
 	if(skmib._neighbor == 1){
-		data = enc_setup_neighbor(&len);
+		//data = enc_setup_neighbor(&len);
 	}else if(skmib._userAuth == 1){
 		//data = enc_auth_to_main(int authNeighborLen, int* neighborNum);
-		data = select_neighborList(&len);
+		//data = select_neighborList(&len);
 	}else if(skmib._userAuthReq == 1){
-		data = enc_auth_to_main(&len);
+		//data = enc_auth_to_main(&len);
 		printf("Auth Req :%lf\n",clock());
 	}
 	if(len > 0) client_send(data, len);

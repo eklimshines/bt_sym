@@ -10,8 +10,8 @@
 #include <bluetooth/hci_lib.h>
 #include <openssl/aes.h>
 #include <openssl/des.h>
-#include <pbc.h>
-#include <pbc_test.h>
+//#include <pbc.h>
+//#include <pbc_test.h>
 #include <pthread.h>
 #include <stdint.h>
 #include <unistd.h>
@@ -20,7 +20,7 @@
 #include <time.h>
 #include <arpa/inet.h>
 #include <openssl/hmac.h>
-#include <sqlite3.h>
+//#include <sqlite3.h>
 
 #define DEV_ID 0x05
 
@@ -119,7 +119,7 @@ void l2cap_send_sock(unsigned char* data, int len, int sock);
 void l2cap_send(unsigned char* data, int len);
 
 //sym.c
-unsigned char* genSymKey(int keyLen, *int len);
+unsigned char* genSymKey(int keyLen);
 
 //network.c
 void* network_thread(void *arg);
@@ -131,6 +131,7 @@ int server_tcpsend(uint8_t *data, int lenght);
 //network_client.c
 void* tcp_client_thread(void *arg);
 int client_send(uint8_t *data, int lenght);
+int client_disconnect(void);
 
 //network_parse.c
 void parse_role(unsigned char* data);
@@ -141,7 +142,14 @@ void sendKeyPacket(unsigned char* _key, int keyLen);
 void sendTag(unsigned char* data);
 void sendEnc(char* ID, int index);
 
+//save.c
+void saveSymKey(unsigned char* data, int len);
+void readSymKey();
+void saveNeighborList(unsigned char* _key, int keyLen, unsigned char* _mac, int macLen, int devNum);
+unsigned char* readNeighborList(int *len);
+
 extern SKMIB_t skmib;
 extern CONFIG_t cfg;
 extern CHECK_t auth[8];
 extern AUTH_t auth2;
+extern int nCount;

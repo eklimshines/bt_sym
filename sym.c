@@ -1,12 +1,14 @@
 #include "main.h"
 
-unsigned char* genSymKey(int keyLen, *int len){
-	unsigned char symkey[keyLen];
+unsigned char* genSymKey(int keyLen){
+	unsigned char* symKey = NULL;
 
-	if (!RAND_bytes(symkey, keyLen)){
+	symKey = (unsigned char*)malloc(keyLen);
+
+	if (!RAND_bytes(symKey, keyLen)){
         	exit(-1);
 	}
-	symkey[keyLen-1] = '\0';
+	symKey[keyLen-1] = '\0';
 
 	return symKey;
 }
