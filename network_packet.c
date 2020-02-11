@@ -142,8 +142,8 @@ void sendEncPacket(unsigned char* ID, int index){
 	_key = genSymKey(keyLen);
 	memcpy(auth[index].KEY, _key, keyLen);
 
+	_enc = (unsigned char*)malloc(encLen);
 	aes_encrypt(auth[index].KEY, _enc, encLen, auth[index].nKEY, keyLen);
-
 
 	memcpy(auth[index].CIPHER, _enc, encLen);
 
