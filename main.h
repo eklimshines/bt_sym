@@ -62,15 +62,8 @@ typedef struct tCONFIG{
 	int maindeviceport;
 	int userport;
 	int L2capport;
+	int devNum;
 }CONFIG_t;
-
-typedef struct _AUTHMIB{
-	char _neighborMAC[20];
-	char _nKEY[128];
-	char _KEY[128];
-	char _ENC[1024];
-}AUTHMIB_t;
-
 
 typedef struct _AUTH2{
 	int cnt_neighbor;
@@ -138,6 +131,7 @@ void parse_role(unsigned char* data);
 void parse_role_socket(unsigned char* data, int socket);
 
 //network_packet.c
+void sendnRegPacket();
 void sendKeyPacket(unsigned char* _key, int keyLen);
 void sendTag(unsigned char* data);
 void sendEnc(char* ID, int index);
@@ -153,3 +147,4 @@ extern CONFIG_t cfg;
 extern CHECK_t auth[8];
 extern AUTH_t auth2;
 extern int nCount;
+extern unsigned char _nKEY[128];

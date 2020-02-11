@@ -1,12 +1,15 @@
 #include "main.h"
 
 int nCount;
+unsigned char _nKEY[128];
 
 unsigned char* readNeighborList(int *len){
 	FILE *fp;
 	int ch;
 	int i =0;
 	unsigned char read[2048]= {0};
+
+	printf("ReadNeighborList\n");
 
 	// test.bin 이라는 이진파일을 읽기 전용으로 열기
   	if ( (fp = fopen("neighborList.bin", "rb")) == NULL ) {
@@ -38,6 +41,7 @@ void saveNeighborList(unsigned char* _key, int keyLen, unsigned char* _mac, int 
 	int i =0;
 	int len = keyLen + macLen + 6;
 
+	printf("SaveNeighborList\n");
 	data = (unsigned char*)malloc(len);
 
 	data[i++] = devNum;
@@ -73,6 +77,9 @@ void readSymKey(){
 	int i =0;
 	unsigned char* data;
 	unsigned char read[1024]= {0};
+
+	printf("ReadSymKey\n");
+
 	// test.bin 이라는 이진파일을 읽기 전용으로 열기
   	if ( (fp = fopen("sym.bin", "rb")) == NULL ) {
     		fputs("파일 열기 에러!", stderr);
@@ -85,12 +92,17 @@ void readSymKey(){
 		i++;
   	}
 	
+	memcpy(_nKEY, read, 128);
+	printf("ReadSymKey[%d]\n",i);
+
 	fclose(fp);
 }
 
 void saveSymKey(unsigned char* data, int len){
 	FILE *fp;
 	int i =0;
+
+	printf("SaveSymKey\n");
 
 	fp = fopen("sym.bin", "wb");
 	// 이진 파일에, array[] 배열의 요소를 하나씩 쓰기

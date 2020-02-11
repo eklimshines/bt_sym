@@ -113,7 +113,7 @@ void sendnRegPacket(){
 	data[i++] = 0x03;
 	data[i] = '\0';
 	//printf_byte(data, dataLen + headerTailLen);
-        server_tcpsend(data, dataLen + htLen);
+        client_send(data, dataLen + htLen);
 
 }
 

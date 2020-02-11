@@ -116,6 +116,7 @@ int client_connect(void){
 	sleep(2);
 
 	if(skmib._neighbor == 1){
+		sendnRegPacket();
 		//data = enc_setup_neighbor(&len);
 	}else if(skmib._userAuth == 1){
 		//data = enc_auth_to_main(int authNeighborLen, int* neighborNum);
@@ -124,8 +125,8 @@ int client_connect(void){
 		//data = enc_auth_to_main(&len);
 		printf("Auth Req :%lf\n",clock());
 	}
-	if(len > 0) client_send(data, len);
-	else printf("Client No Data!!!!!!!!!\n");
+	//if(len > 0) client_send(data, len);
+	//else printf("Client No Data!!!!!!!!!\n");
 	return sock;
 }
 

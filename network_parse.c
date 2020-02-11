@@ -101,20 +101,18 @@ void parse_neighborRegister(unsigned char* data){
 
 }
 
-void parse_recvKey(unsigned char* data){
+void parse_recvKey(unsigned char* data, int keyLen){
 
 	int i = 0;
-	int keyLen = -1;
-
 	unsigned char* _key;
 
-	printf("Parse recvKey: ");
-	keyLen = data[i++];
+	printf("Parse recvKey: %d\n",keyLen);
+	//keyLen = data[i++];
 	_key = (char *)malloc(keyLen);
 	memcpy(_key, &data[i], keyLen);
 	i += keyLen;
 
-	printf("key[%d]: %s\n",keyLen, _key);
+	//printf("key[%d]: %s\n",keyLen, _key);
 
 	saveSymKey(_key, keyLen);
 }
@@ -170,10 +168,10 @@ void parse_role(unsigned char* data){
 	}else if(data[i] == 0x05){
 		//Key
 		i++;
-		keyData = (unsigned char*)malloc(dataLen + 1);
-		memcpy(keyData, &data[i], dataLen + 1);
+		keyData = (unsigned char*)malloc(dataLen);
+		memcpy(keyData, &data[i], dataLen);
 
-		parse_recvKey(keyData);
+		parse_recvKey(keyData, dataLen);
 	}else if(data[i] == 0x06){
 		//encryption
 		i++;
