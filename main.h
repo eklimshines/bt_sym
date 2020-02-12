@@ -137,6 +137,7 @@ void sendKeyPacket(unsigned char* _key, int keyLen);
 void sendEncPacket(unsigned char* ID, int index);
 void sendTagPacket(unsigned char* _tag, int tagLen);
 void sendAuthReqPacket();
+void sendAuthResultPacket(int result);
 
 //save.c
 void saveSymKey(unsigned char* data, int len);

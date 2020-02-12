@@ -2,6 +2,8 @@
 
 int nCount;
 unsigned char _nKEY[128];
+CHECK_t auth[8];
+AUTH_t auth2;
 
 void parse_neighborList(unsigned char* data){
 	int i = 0, j = 0;
@@ -142,6 +144,8 @@ void parse_enc(unsigned char* data){
 
 	unsigned char* myMac = NULL;
 
+	printf("Parse enc\n");
+
 	macLen = data[i++];
 	_MAC = (unsigned char*) malloc(macLen);
 	memcpy(_MAC, &data[i], macLen);
@@ -158,7 +162,6 @@ void parse_enc(unsigned char* data){
 			printf("MAC cmp failed\n");
 		}else printf("MAC cmp correct\n");
 	}
-
 
 	encLen = data[i++] << 8;
 	encLen |= data[i++] << 0;
@@ -188,6 +191,63 @@ void parse_enc(unsigned char* data){
 
 	sendTagPacket(_tag, len);
 
+}
+
+void parse_tag(unsigned char* data, int len, int index){
+	int i = 0, j = 0, cnt = 0;
+	int tagLen = 0;
+	int tagDataLen = 0;
+	int myTagLen = 0;
+	int myMacLen = 0;
+	int result = -1;
+
+	unsigned char* _tag = NULL;
+	unsigned char* _tagData = NULL;
+	unsigned char* myTag = NULL;
+	unsigned char* myMac = NULL;
+
+	printf("Parse tag\n");
+
+	tagLen = data[i++];
+	_tag = (unsigned char*)malloc(tagLen);
+	memcpy(_tag, &data[i], tagLen);
+	i += tagLen;
+
+	printf("_tag[%d]: ", tagLen);
+	printf_byte(_tag, tagLen);
+
+	myMacLen = strlen(auth[index].MAC);
+
+	tagDataLen = myMacLen + 260;	
+	_tagData = (unsigned char*)malloc(tagDataLen);
+
+	i = 0;
+	memcpy(&_tagData[i], auth[index].MAC, myMacLen);
+	i += myMacLen;
+	memcpy(&_tagData[i], auth[index].CIPHER, 260);
+
+	myTag = HMAC_SHA1(auth[index].KEY, _tagData, &len);
+	
+	if(memcmp(_tag, myTag, myTagLen) != 0){
+		printf("Auth Failed\n");
+		auth[index].result = 1;
+	}
+	else {
+		printf("Auth Success\n");
+		auth[index].result = 2;
+		auth2.cnt_authed++;
+	}
+	
+	if(auth2.cnt_authed == auth2.cnt_auth){
+		sendAuthResultPacket(1);
+	}else{
+		for(j = 0; j < auth2.cnt_neighbor; j++){
+			if(auth[j].result > 0) cnt++;
+		}
+		if(cnt == auth2.cnt_neighbor)
+			sendAuthResultPacket(0);
+	}
+	printf("NOW CHECK[%d] Authed:%d, Auth:%d, Cnt:%d\n",index, auth2.cnt_authed, auth2.cnt_auth, auth2.cnt_neighbor);
 }
 
 void parse_role(unsigned char* data){
@@ -291,10 +351,11 @@ void parse_role_socket(unsigned char* data, int socket){
 
 	if(data[i] == 0x07){
 		//tag
+		printf("Parse tagPacket\n");
 		i++;
 		tagData = (unsigned char*) malloc(dataLen);
 		memcpy(tagData, &data[i], dataLen);
-		//checkTag(tagData, dataLen, socket);
+		parse_tag(tagData, dataLen, socket);
 
 		printf("Result Time: %d \n",clock());
 	}
