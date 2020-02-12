@@ -169,6 +169,9 @@ void parse_enc(unsigned char* data){
 	_key = (unsigned char*)malloc(128);
 	aes_decrypt(_enc, _key, encLen, _nKEY, 128);
 
+	printf("parse_enc key: ");
+	printf_byte(_key, 128);
+
 	tagDataLen = myMacLen + encLen;	
 	_tagData = (unsigned char*)malloc(tagDataLen);
 
@@ -183,7 +186,7 @@ void parse_enc(unsigned char* data){
 	printf("_tag[%d]: ", len);
 	printf_byte(_tag, len);
 
-	//sendTaga(_tag, len);
+	sendTagPacket(_tag, len);
 
 }
 
@@ -251,6 +254,7 @@ void parse_role(unsigned char* data){
 		i++;
 		encData = (unsigned char*) malloc(dataLen);
 		memcpy(encData, &data[i], dataLen);
+		parse_enc(encData);
 
 		//sendTag(encData);
 
