@@ -209,6 +209,8 @@ void sendTagPacket(unsigned char* _tag, int tagLen){
 	data[i++] = 0x03;
 
 	l2cap_send(data, dataLen);
+	sleep(1);
+	l2cap_close();
 	//blue_send(data, dataLen);
 }
 

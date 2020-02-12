@@ -9,7 +9,6 @@ CHECK_t auth[8];
 
 void l2cap_setsock(int sock);
 int l2cap_getsock();
-void l2cap_close();
 
 void l2cap_setsock(int sock){
 	l2cap_sock = sock;

@@ -110,6 +110,7 @@ void* bluetooth_thread(void *arg);
 void* l2cap_thread(void *arg);
 void l2cap_send_sock(unsigned char* data, int len, int sock);
 void l2cap_send(unsigned char* data, int len);
+void l2cap_close();
 
 //sym.c
 unsigned char* genSymKey(int keyLen);
