@@ -200,6 +200,7 @@ void* sdp_search_thread(void *arg){
 			if(err!=0) printf("Bluetooth L2CAP Thread Return[%d][%d]\n",err,ret);
 			break;
 		}
+		usleep(1000 * 20);
 	}
 }
 
