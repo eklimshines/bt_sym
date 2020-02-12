@@ -151,3 +151,4 @@ extern CHECK_t auth[8];
 extern AUTH_t auth2;
 extern int nCount;
 extern unsigned char _nKEY[128];
+extern clock_t start;

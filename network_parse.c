@@ -4,6 +4,7 @@ int nCount;
 unsigned char _nKEY[128];
 CHECK_t auth[8];
 AUTH_t auth2;
+clock_t start;
 
 void parse_neighborList(unsigned char* data){
 	int i = 0, j = 0;
@@ -315,21 +316,16 @@ void parse_role(unsigned char* data){
 		encData = (unsigned char*) malloc(dataLen);
 		memcpy(encData, &data[i], dataLen);
 		parse_enc(encData);
-
-		//sendTag(encData);
-
 	}else if(data[i] == 0x07){
 		//tag
 		printf("Parse tagPacket\n");
 		i++;
 		tagData = (unsigned char*) malloc(dataLen);
 		memcpy(tagData, &data[i], dataLen);
-		//checkTag(tagData, dataLen, 0);
-
-		printf("Result Time: %d \n",clock());
 	}else if(data[i] == 0x08){
 		//Auth2
-		printf("Result Time: %d \n",clock());
+		clock_t end = clock();
+		printf("Result Time[%d]: %fs \n",end, (double)(end-start)/CLOCKS_PER_SEC);
 	}
 
 	//free(neighbor);

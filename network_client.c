@@ -9,6 +9,7 @@ CLTSESSION_t client_setsession(CLTSESSION_t session);
 CLTSESSION_t client_getsession(void);
 SKMIB_t skmib;
 CONFIG_t cfg;
+clock_t start;
 
 void client_setconn(int conn);
 int client_getconn(void);
@@ -121,7 +122,8 @@ int client_connect(void){
 		sendnListPacket();
 	}else if(skmib._userAuthReq == 1){
 		sendAuthReqPacket();
-		printf("Auth Req :%lf\n",clock());
+		start = clock();
+		printf("Auth Req :%lf\n",start);
 	}
 	//if(len > 0) client_send(data, len);
 	//else printf("Client No Data!!!!!!!!!\n");
