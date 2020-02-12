@@ -136,12 +136,17 @@ void sendEncPacket(unsigned char* ID, int index){
 	int macLen = strlen(ID);
 	int dataLen = -1;
 	clock_t start, end;
+	
+	printf("sendEncPacket(Main->Neighbor)\n");
 
 	start = clock();
 
 	_key = genSymKey(keyLen);
 	memcpy(auth[index].KEY, _key, keyLen);
 
+	printf("sendEncPacket KEY: ");
+	printf_byte(auth[index].KEY, keyLen);
+	
 	_enc = (unsigned char*)malloc(encLen);
 	aes_encrypt(auth[index].KEY, _enc, encLen, auth[index].nKEY, keyLen);
 
@@ -184,6 +189,8 @@ void sendTagPacket(unsigned char* _tag, int tagLen){
 	int dataLen = 0;
 
 	unsigned char* data;
+
+	printf("sendTagPacket(Neighbor->Main)\n");
 
 	dataLen = 6 + tagLen;
 	data = (unsigned char*) malloc(dataLen);

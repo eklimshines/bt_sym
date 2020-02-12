@@ -1,6 +1,7 @@
 #include "main.h"
 
 int nCount;
+unsigned char _nKEY[128];
 
 void parse_neighborList(unsigned char* data){
 	int i = 0, j = 0;
@@ -123,6 +124,68 @@ void parse_recvKey(unsigned char* data, int keyLen){
 	saveSymKey(_key, keyLen);
 }
 
+void parse_enc(unsigned char* data){
+	int i = 0;
+	int macLen = 0;
+	int encLen = 0;
+	int len = 0;
+	int keyLen = 0;
+	int myMacLen = 0;
+	int tagDataLen = 0;
+
+	unsigned char* _enc = NULL;
+	unsigned char* _MAC = NULL;
+	unsigned char* _key = NULL;
+	unsigned char* _tag = NULL;
+	unsigned char* _dec = NULL;
+	unsigned char* _tagData = NULL;
+
+	unsigned char* myMac = NULL;
+
+	macLen = data[i++];
+	_MAC = (unsigned char*) malloc(macLen);
+	memcpy(_MAC, &data[i], macLen);
+	i += macLen;
+
+	myMac = get_bt_addr();
+	myMacLen = strlen(myMac);
+
+	if(myMacLen != macLen){
+		printf("Mac Len failed\n");
+	}else {
+		printf("Mac len Correct\n");
+		if(memcmp(myMac, _MAC, myMacLen) != 0){
+			printf("MAC cmp failed\n");
+		}else printf("MAC cmp correct\n");
+	}
+
+
+	encLen = data[i++] << 8;
+	encLen |= data[i++] << 0;
+	_enc = (unsigned char*) malloc(encLen);
+	memcpy(_enc, &data[i], encLen);
+	i += encLen;
+
+	_key = (unsigned char*)malloc(128);
+	aes_decrypt(_enc, _key, encLen, _nKEY, 128);
+
+	tagDataLen = myMacLen + encLen;	
+	_tagData = (unsigned char*)malloc(tagDataLen);
+
+	i = 0;
+	memcpy(&_tagData[i], myMac, myMacLen);
+	i += myMacLen;
+	memcpy(&_tagData[i], _enc, encLen);
+	
+	//_tag = HMAC_SHA512(_key, keyLen, _tagData, &len);
+	_tag = HMAC_SHA1(_key, _tagData, &len);
+
+	printf("_tag[%d]: ", len);
+	printf_byte(_tag, len);
+
+	//sendTaga(_tag, len);
+
+}
 
 void parse_role(unsigned char* data){
 
