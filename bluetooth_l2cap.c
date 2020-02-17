@@ -17,6 +17,7 @@ int l2cap_getsock(){
 	return l2cap_sock;
 }
 void l2cap_close(){
+	printf("L2CAP CLOSE\n");
 	close(l2cap_sock);
 }
 
